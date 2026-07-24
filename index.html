@@ -720,6 +720,33 @@
   .msg.typing span:nth-child(3) { animation-delay: .3s; }
   @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); opacity: .5; } 30% { transform: translateY(-4px); opacity: 1; } }
 
+  .chat-inline-chip {
+    display: inline-flex; align-items: center; margin-top: 8px; padding: 6px 12px;
+    border-radius: var(--r-pill); border: 1px solid var(--accent); color: var(--accent-strong);
+    background: var(--accent-soft); font-size: 12.5px; font-weight: 700; cursor: pointer;
+  }
+  .chat-inline-chip:disabled { opacity: .5; cursor: default; }
+
+  .msg.chat-mail-card-wrap { max-width: 100%; width: 100%; background: none; padding: 0; }
+  .chat-mail-card {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md);
+    padding: 12px; font-size: 13px;
+  }
+  .chat-mail-field { margin-bottom: 8px; }
+  .chat-mail-field label {
+    display: block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    color: var(--ink-muted); margin-bottom: 3px;
+  }
+  .chat-mail-field input, .chat-mail-field textarea {
+    width: 100%; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 7px 9px;
+    font-size: 12.5px; background: var(--bg-soft); color: var(--ink); font-family: inherit; outline: none;
+  }
+  .chat-mail-field input:focus, .chat-mail-field textarea:focus { border-color: var(--accent); }
+  .chat-mail-field textarea { min-height: 90px; resize: vertical; line-height: 1.4; }
+  .chat-mail-actions { display: flex; gap: 8px; margin-top: 6px; }
+  .chat-mail-actions button { flex: 1; padding: 8px 10px; font-size: 12.5px; }
+  .chat-mail-sent { font-size: 13px; color: var(--good-ink); font-weight: 700; padding: 4px 2px; }
+
   .chat-suggestions { display: flex; gap: 8px; padding: 0 16px 12px; flex-wrap: wrap; flex-shrink: 0; }
   .suggestion-chip {
     border: 1px solid var(--border); background: var(--bg-soft); color: var(--ink-secondary);
@@ -1695,12 +1722,12 @@
     </button>
   </div>
   <div class="chat-messages" id="chatMessages">
-    <div class="msg bot">Hej Erik! Jag kan sammanfatta mejlutkast, fakturor, öppna ärenden eller dagens agenda. Vad vill du veta?</div>
+    <div class="msg bot">Hej Erik! Jag kan svara på frågor, men jag kan också göra saker åt dig direkt — skicka mejl, bygga scheman, publicera kalendern. Prova att skriva vad du vill göra.</div>
   </div>
   <div class="chat-suggestions" id="chatSuggestions">
-    <button class="suggestion-chip" data-q="Sammanfatta mejlutkast">Sammanfatta mejlutkast</button>
-    <button class="suggestion-chip" data-q="Några fakturautkast att skicka?">Några fakturautkast att skicka?</button>
-    <button class="suggestion-chip" data-q="Vad har jag idag?">Vad har jag idag?</button>
+    <button class="suggestion-chip" data-q="Skicka ett mejl till Erik och berätta att vi tränar på A-planen på tisdag kl 18">Skicka ett mejl till Erik</button>
+    <button class="suggestion-chip" data-q="Skapa ett träningsschema för nästa vecka">Skapa träningsschema</button>
+    <button class="suggestion-chip" data-q="Publicera veckans schema">Publicera veckans schema</button>
   </div>
   <div class="chat-input-row">
     <input type="text" id="chatInput" placeholder="Skriv en fråga…" autocomplete="off" />
@@ -2600,6 +2627,8 @@
     return ex;
   }
 
+  function pick(...opts) { return opts[Math.floor(Math.random() * opts.length)]; }
+
   function generateEmailFromKeywords(keywordsRaw) {
     const facts = keywordsRaw.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
     if (!facts.length) facts.push(keywordsRaw.trim());
@@ -2625,34 +2654,34 @@
     if (/tack|tacka/.test(lower)) {
       opener = `Jag vill börja med att tacka så mycket för ${firstGroup} — det har betytt mycket för föreningen.`;
       middle = secondGroup ? `Vi har tagit fasta på ${secondGroup} och återkommer gärna med mer information om det.` : '';
-      closer = 'Hör gärna av dig om du har några frågor.';
+      closer = pick('Hör gärna av dig om du har några frågor.', 'Säg till om det är något mer vi kan hjälpa till med.');
     } else if (/välkom/.test(lower)) {
       const rest = facts.filter(f => !/välkom/i.test(f));
       opener = 'Varmt välkomna till Västerås SK!';
       middle = rest.length
         ? `${upperFirst(joinNatural(rest))}. Vi ser fram emot att ha er med i föreningen.`
         : 'Vi ser fram emot att ha er med i föreningen.';
-      closer = 'Hör gärna av er om ni har några frågor innan dess.';
+      closer = pick('Hör gärna av er om ni har några frågor innan dess.', 'Vi ses snart!');
     } else if (/skada|försäkring|olycka/.test(lower)) {
       opener = `Jag hör av mig angående ${firstGroup}.`;
       middle = secondGroup ? `Det rör ${secondGroup} — vi hjälper er gärna vidare med det.` : '';
-      closer = 'Hör gärna av dig så snart du har möjlighet, så löser vi det här tillsammans.';
-    } else if (/möte|boka|tid|schema|träning|flytta|ändr/.test(lower)) {
+      closer = pick('Hör gärna av dig så snart du har möjlighet, så löser vi det här tillsammans.', 'Säg till om ni behöver hjälp med nästa steg.');
+    } else if (/möte|boka|tid|schema|trän|flytta|ändr/.test(lower)) {
       opener = `Jag hör av mig angående ${firstGroup}.`;
       middle = secondGroup ? `Det gäller närmare bestämt ${secondGroup}.` : '';
-      closer = 'Säg till om tiden inte passar, så löser vi det tillsammans.';
+      closer = pick('Säg till om tiden inte passar, så löser vi det tillsammans.', 'Hör av dig om något behöver justeras.');
     } else if (/fråga|undrar|check|kolla/.test(lower)) {
       opener = `Jag skriver för att fråga om ${firstGroup}.`;
       middle = secondGroup ? `Närmare bestämt gäller det ${secondGroup}.` : '';
-      closer = 'Tacksam för besked när du har möjlighet.';
+      closer = pick('Tacksam för besked när du har möjlighet.', 'Hör gärna av dig så snart du kan.');
     } else if (/faktura|betalning|avgift|kostnad/.test(lower)) {
       opener = `Det här mejlet gäller ${firstGroup}.`;
       middle = secondGroup ? `Konkret handlar det om ${secondGroup}.` : '';
-      closer = 'Hör av dig om något är oklart eller behöver justeras.';
+      closer = pick('Hör av dig om något är oklart eller behöver justeras.', 'Säg till om ni har några frågor kring detta.');
     } else {
       opener = `Jag skriver angående ${firstGroup}.`;
       middle = secondGroup ? `Det handlar närmare bestämt om ${secondGroup}.` : '';
-      closer = 'Säg gärna till om du har några frågor eller behöver mer information.';
+      closer = pick('Säg gärna till om du har några frågor eller behöver mer information.', 'Hör av dig om det är något mer du undrar över.');
     }
 
     const meddelande = ['Hej,', opener, middle, closer].filter(Boolean).join('\n\n');
@@ -3409,12 +3438,12 @@ Kansliet, Västerås SK</div>
         return `Jag har redan skrivit ${drafts} fakturautkast — du behöver bara granska och skicka dem. ${waiting} fakturor är skickade och väntar på betalning, och 21 inbetalningar har matchats automatiskt denna månad.`;
       }
       if (t.includes('schema') || t.includes('träning') || t.includes('tranning')) {
-        return 'Veckoschemat är byggt utifrån varje lags preferenser — Herrlaget A och Flickor P10 har alltid förtur på konstgräs, övriga lag fylls in runt dem. Vill du justera en preferens, säg bara vilket lag det gäller.';
+        return 'Veckoschemat är byggt utifrån varje lags preferenser — Herrlag och Damlag har alltid förtur på A-planen, övriga lag fylls in runt dem. Vill du att jag genererar ett nytt schema eller bokar om ett lag, säg bara det.';
       }
       if (t.includes('mejl') || t.includes('utkast') || t.includes('inkorg')) {
         const pending = MAIL.filter(m => !m.sent);
         const hog = pending.filter(m => m.priority === 'hog').length;
-        return `I natt skrev jag ${pending.length} mejlutkast kopplade till Outlook, ${hog} med hög prioritet — bland annat svar till familjen Berg om medlemsavgiften och bekräftelsen till kommunen om hallbokningen.`;
+        return `I natt skrev jag ${pending.length} mejlutkast kopplade till Outlook, ${hog} med hög prioritet — bland annat svar till familjen Berg om medlemsavgiften och bekräftelsen till kommunen om hallbokningen. Vill du att jag skriver och skickar ett nytt mejl åt dig, säg bara till vem och vad det gäller.`;
       }
       if (t.includes('öppna') || t.includes('oppna')) {
         return 'Just nu är 24 ärenden öppna: 11 pågår aktivt, 7 väntar på svar och 6 är nya sedan i förrgår.';
@@ -3428,7 +3457,225 @@ Kansliet, Västerås SK</div>
       if (t.includes('deadline') || t.includes('snart') || t.includes('närmast')) {
         return 'Närmast i tid: Medlemsansökan – familjen Berg (U10), deadline 24 juli.';
       }
-      return 'Jag är en demoversion just nu och kan svara på frågor om mejlutkast, fakturor, scheman, öppna ärenden eller dagens agenda. Testa gärna ett av förslagen ovan!';
+      return 'Jag kan svara på frågor om mejl, fakturor, scheman eller ärenden — men jag kan också göra saker åt dig direkt. Testa till exempel "Skicka ett mejl till Erik om medlemsavgiften" eller "Skapa ett träningsschema".';
+    }
+
+    // ---- Kontaktkatalog för att gissa e-postadress utifrån ett namn ----
+    const CHAT_CONTACTS = {
+      erik: 'erik.soderberg@vasterassk.se',
+      tommy: 'tommy@vasterassk.se',
+      maria: 'maria.lindqvist@vasterassk.se',
+      johan: 'johan.ahlgren@vasterassk.se',
+    };
+    function guessEmailForName(name) {
+      const key = name.toLowerCase();
+      return CHAT_CONTACTS[key] || `${key}@vasterassk.se`;
+    }
+
+    function extractRecipientName(text) {
+      let m = text.match(/till\s+([A-ZÅÄÖ][\wåäöÅÄÖ]*)/);
+      if (m) return m[1];
+      m = text.match(/^(?:meddela|informera)\s+([A-ZÅÄÖ][\wåäöÅÄÖ]*)/i);
+      if (m) return m[1];
+      return null;
+    }
+
+    function extractMailContent(text, recipient) {
+      let content = text;
+      if (recipient) {
+        content = content.replace(new RegExp('till\\s+' + recipient, 'i'), '');
+        content = content.replace(new RegExp('^(meddela|informera)\\s+' + recipient, 'i'), '');
+      }
+      content = content
+        .replace(/^(skicka|maila|skriv)\s+(ett |en |ett nytt )?mejl\s*/i, '')
+        .replace(/^(meddela|informera)\s*/i, '')
+        .trim()
+        .replace(/^(och\s+)?(berätta|säg)?\s*(att)?\s*/i, '')
+        .replace(/[.!]+$/, '')
+        .trim();
+      return content || text;
+    }
+
+    function matchMailIntent(lower) {
+      if (/^(meddela|informera)\b/.test(lower)) return true;
+      if (/^(skicka|maila|skriv)\b/.test(lower) && /mejl/.test(lower)) return true;
+      return false;
+    }
+    function matchScheduleGenerateIntent(lower) {
+      return /(skapa|generera|bygg)\b.*(schema|träningsschema)/.test(lower);
+    }
+    function matchPublishIntent(lower) {
+      return /publicera\b.*(schema|kalender|vecka)/.test(lower);
+    }
+    function matchBookingIntent(lower) {
+      return /boka om|flytta\b.*trän|boka\b.*(plan|hall)/.test(lower);
+    }
+    const WEEKDAY_MAP = { måndag: 'Mån', tisdag: 'Tis', onsdag: 'Ons', torsdag: 'Tor', fredag: 'Fre' };
+    function extractDay(lower) {
+      for (const full in WEEKDAY_MAP) { if (lower.includes(full)) return WEEKDAY_MAP[full]; }
+      for (const short of DAY_NAMES) { if (lower.includes(short.toLowerCase())) return short; }
+      return null;
+    }
+    function extractTeamName(lower) {
+      const found = TEAMS.find(t => lower.includes(t.name.toLowerCase()));
+      return found ? found.name : null;
+    }
+    const NAV_KEYWORDS = {
+      mejl: ['mejl', 'inkorg', 'e-post'],
+      fakturor: ['faktura'],
+      kalender: ['kalender'],
+      schema: ['schema'],
+      arenden: ['ärend'],
+      statistik: ['statistik'],
+      rapporter: ['rapport'],
+      oversikt: ['översikt', 'oversikt', 'hem'],
+    };
+    function matchNavigationIntent(lower) {
+      if (!/^(visa|gå till|öppna|navigera)\b/.test(lower)) return null;
+      for (const view in NAV_KEYWORDS) {
+        if (NAV_KEYWORDS[view].some(k => lower.includes(k))) return view;
+      }
+      return null;
+    }
+    const VIEW_LABEL = {
+      oversikt: 'Översikt', mejl: 'Mejl', fakturor: 'Fakturor', kalender: 'Kalendern',
+      schema: 'Schema', arenden: 'Ärenden', statistik: 'Statistik', rapporter: 'Rapporter',
+    };
+
+    function interpretMessage(text) {
+      const lower = text.toLowerCase();
+
+      if (matchMailIntent(lower)) {
+        const recipient = extractRecipientName(text);
+        const content = extractMailContent(text, recipient);
+        const generated = generateEmailFromKeywords(content);
+        const toEmail = recipient ? guessEmailForName(recipient) : '';
+        return {
+          kind: 'mail',
+          intro: recipient
+            ? `Jag har skrivit ett mejl till ${recipient}. Granska det nedan innan jag skickar.`
+            : 'Jag har skrivit ett mejlförslag. Granska det nedan innan jag skickar.',
+          mail: { till: toEmail, amne: generated.amne, meddelande: generated.meddelande },
+          originalContent: content,
+        };
+      }
+      if (matchScheduleGenerateIntent(lower)) {
+        generateSchedule();
+        safe(renderScheduleResult);
+        return {
+          kind: 'action',
+          text: 'Klart! Jag har byggt ett nytt träningsschema utifrån alla lags önskemål och anläggningarnas lediga tider, utan schemakrockar.',
+          chip: { label: 'Visa schema', goto: 'schema' },
+        };
+      }
+      if (matchPublishIntent(lower)) {
+        if (!generatedSchedule) { generateSchedule(); safe(renderScheduleResult); }
+        publishToCalendar();
+        return {
+          kind: 'action',
+          text: 'Publicerat! Det uppdaterade schemat är nu synligt i kalendern för alla användare.',
+          chip: { label: 'Visa kalender', goto: 'kalender' },
+        };
+      }
+      if (matchBookingIntent(lower)) {
+        const day = extractDay(lower);
+        const teamName = extractTeamName(lower);
+        if (teamName && day) {
+          const team = TEAMS.find(tm => tm.name === teamName);
+          if (!team.preferredDays.includes(day)) team.preferredDays.push(day);
+          team.blockedDays = team.blockedDays.filter(d => d !== day);
+          safe(renderTeams);
+          return {
+            kind: 'action',
+            text: `Klart! Jag har lagt till ${day} som träningsdag för ${teamName}. Vill du att jag genererar om schemat så det syns direkt?`,
+            chip: { label: 'Generera schema', action: 'generate-schedule' },
+          };
+        }
+        if (day && !teamName) return { kind: 'text', text: `Vilket lag gäller det? Till exempel: "Boka om ${day} för Herrlag".` };
+        if (teamName && !day) return { kind: 'text', text: `Vilken dag vill du flytta ${teamName} till?` };
+        return { kind: 'text', text: 'Vilket lag och vilken dag gäller det? Till exempel: "Boka om P13 till torsdag".' };
+      }
+      const navView = matchNavigationIntent(lower);
+      if (navView) {
+        safe(() => activate(navView));
+        return { kind: 'action', text: `Klart, jag har öppnat ${VIEW_LABEL[navView]} åt dig.` };
+      }
+
+      return { kind: 'text', text: reply(text) };
+    }
+
+    function appendActionChip(botMsg, chip) {
+      botMsg.appendChild(document.createElement('br'));
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chat-inline-chip';
+      btn.textContent = chip.label;
+      botMsg.appendChild(btn);
+      btn.addEventListener('click', () => {
+        if (chip.goto) safe(() => activate(chip.goto));
+        if (chip.action === 'generate-schedule') {
+          generateSchedule();
+          safe(renderScheduleResult);
+          safe(() => activate('schema'));
+        }
+        btn.disabled = true;
+      });
+    }
+
+    function appendMailPreviewMessage(intro, mail, originalContent) {
+      const introMsg = document.createElement('div');
+      introMsg.className = 'msg bot';
+      messages.appendChild(introMsg);
+      typewrite(introMsg, intro, {
+        onStep: () => { messages.scrollTop = messages.scrollHeight; },
+        onDone: () => {
+          const uid = 'chatMail' + Date.now();
+          const wrap = document.createElement('div');
+          wrap.className = 'msg bot chat-mail-card-wrap';
+          wrap.innerHTML = `
+            <div class="chat-mail-card">
+              <div class="chat-mail-field">
+                <label>Till</label>
+                <input type="email" id="${uid}-till" value="${mail.till}">
+              </div>
+              <div class="chat-mail-field">
+                <label>Ämne</label>
+                <input type="text" id="${uid}-amne" value="${mail.amne}">
+              </div>
+              <div class="chat-mail-field">
+                <label>Meddelande</label>
+                <textarea id="${uid}-meddelande">${mail.meddelande}</textarea>
+              </div>
+              <div class="chat-mail-actions">
+                <button class="btn-ghost" type="button" data-chat-regenerate>Ny version</button>
+                <button class="btn-primary" type="button" data-chat-send>Skicka</button>
+              </div>
+            </div>`;
+          messages.appendChild(wrap);
+          messages.scrollTop = messages.scrollHeight;
+
+          wrap.querySelector('[data-chat-send]').addEventListener('click', () => {
+            const till = document.getElementById(`${uid}-till`).value.trim();
+            const amne = document.getElementById(`${uid}-amne`).value.trim();
+            const meddelande = document.getElementById(`${uid}-meddelande`).value.trim();
+            MAIL.unshift({
+              to: till, subject: amne,
+              body: `${meddelande}\n\nMed vänliga hälsningar\nKansliet, Västerås SK`,
+              time: new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }),
+              sent: true,
+            });
+            safe(renderMail);
+            wrap.querySelector('.chat-mail-card').innerHTML =
+              `<div class="chat-mail-sent">✓ Mejlet är skickat till ${till}.</div>`;
+          });
+
+          wrap.querySelector('[data-chat-regenerate]').addEventListener('click', () => {
+            const regenerated = generateEmailFromKeywords(originalContent);
+            document.getElementById(`${uid}-amne`).value = regenerated.amne;
+            document.getElementById(`${uid}-meddelande`).value = regenerated.meddelande;
+          });
+        },
+      });
     }
 
     function send() {
@@ -3448,11 +3695,22 @@ Kansliet, Västerås SK</div>
 
       setTimeout(() => {
         typing.remove();
+        const result = interpretMessage(text);
+
+        if (result.kind === 'mail') {
+          appendMailPreviewMessage(result.intro, result.mail, result.originalContent);
+          return;
+        }
+
         const botMsg = document.createElement('div');
         botMsg.className = 'msg bot';
         messages.appendChild(botMsg);
-        typewrite(botMsg, reply(text), {
+        typewrite(botMsg, result.text, {
           onStep: () => { messages.scrollTop = messages.scrollHeight; },
+          onDone: () => {
+            if (result.chip) appendActionChip(botMsg, result.chip);
+            messages.scrollTop = messages.scrollHeight;
+          },
         });
       }, 650);
     }
