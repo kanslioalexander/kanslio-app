@@ -555,14 +555,76 @@
   .invoice-item .mail-detail { margin: 0 14px 14px; }
 
   /* ---------- Schemaplanering ---------- */
-  .team-row {
-    display: grid; grid-template-columns: 1.6fr auto auto auto; align-items: center; gap: 14px;
-    padding: 14px 10px; border-radius: var(--r-md); transition: background .15s ease;
-  }
+  .sub-note { font-size: 13px; color: var(--ink-secondary); margin: -2px 0 10px; }
+  .team-row { border-radius: var(--r-md); padding: 4px 10px; transition: background .15s ease; cursor: pointer; }
   .team-row:hover { background: var(--bg-soft); }
+  .team-row-top {
+    display: grid; grid-template-columns: 1.6fr auto auto auto auto; align-items: center; gap: 14px;
+    padding: 12px 0;
+  }
   .team-name { font-weight: 700; font-size: 14.5px; }
   .team-note { font-size: 13px; color: var(--ink-muted); margin-top: 2px; }
   .team-meta { font-size: 13.5px; color: var(--ink-secondary); white-space: nowrap; text-align: right; }
+  .team-row.open .mail-chevron { transform: rotate(90deg); }
+  .team-row.open .mail-detail { display: block; }
+
+  .day-picker { display: flex; gap: 6px; flex-wrap: wrap; }
+  .day-chip {
+    padding: 6px 11px; border-radius: var(--r-pill); border: 1px solid var(--border);
+    background: var(--bg-soft); color: var(--ink-secondary); font-size: 12.5px; font-weight: 700;
+    cursor: pointer; transition: background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .day-chip.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .day-chip.blocked { background: var(--warn-soft); border-color: var(--warn); color: var(--warn-ink); text-decoration: line-through; }
+  .day-picker-label { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-muted); margin: 12px 0 6px; }
+
+  .facility-row {
+    display: grid; grid-template-columns: 1fr 1fr 1.4fr 1.4fr; gap: 14px; align-items: center;
+    padding: 12px 10px; border-radius: var(--r-md);
+  }
+  .facility-row:hover { background: var(--bg-soft); }
+  .facility-name { font-weight: 700; font-size: 14px; }
+  .facility-surface { font-size: 12.5px; color: var(--ink-muted); margin-top: 2px; }
+  .facility-row input {
+    border: 1px solid var(--border); background: var(--bg-soft); color: var(--ink);
+    padding: 7px 10px; border-radius: var(--r-sm); font-size: 12.5px; width: 100%;
+  }
+  .facility-row input:focus { border-color: var(--accent); outline: none; }
+
+  .schedule-toolbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+    margin: 4px 0 18px;
+  }
+  .schedule-team-select {
+    border: 1px solid var(--border); background: var(--bg-soft); color: var(--ink);
+    padding: 8px 12px; border-radius: var(--r-sm); font-size: 13px; font-weight: 600;
+  }
+  .schedule-generated-at { font-size: 12px; color: var(--ink-muted); }
+  .day-empty { font-size: 12px; color: var(--ink-muted); padding: 8px 0; text-align: center; }
+  .schedule-summary-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .schedule-summary-table th {
+    text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-muted);
+    padding: 0 0 8px; border-bottom: 2px solid var(--border); font-weight: 700;
+  }
+  .schedule-summary-table td { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .schedule-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+  .schedule-status {
+    display: none; margin-top: 14px; padding: 12px 16px; border-radius: var(--r-md);
+    background: var(--good-soft); color: var(--good-ink); font-size: 13.5px; font-weight: 600;
+  }
+  .schedule-status.show { display: block; }
+
+  .settings-panel { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .settings-panel.open { display: block; }
+  .settings-stats { display: flex; gap: 24px; flex-wrap: wrap; margin: 18px 0; }
+  .settings-stat { display: flex; flex-direction: column; gap: 6px; }
+  .settings-stat span { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-muted); }
+  .settings-stat strong { font-size: 22px; font-family: ui-rounded, "SF Pro Rounded", system-ui, sans-serif; }
+  .settings-categories { display: flex; gap: 8px; flex-wrap: wrap; }
+  .category-tag {
+    padding: 6px 12px; border-radius: var(--r-pill); background: var(--accent-soft); color: var(--accent-strong);
+    font-size: 12.5px; font-weight: 700;
+  }
 
   /* ---------- Kalender ---------- */
   .week-nav { display: flex; align-items: center; gap: 14px; }
@@ -966,6 +1028,14 @@
     .invoice-doc, .invoice-doc * { visibility: visible; }
     .invoice-doc { position: fixed; inset: 0; margin: 0; max-width: none; box-shadow: none; border-radius: 0; }
     .invoice-doc-actions { display: none; }
+    body.printing-schedule #scheduleResultCard,
+    body.printing-schedule #scheduleResultCard * { visibility: visible; }
+    body.printing-schedule #scheduleResultCard {
+      position: fixed; inset: 0; margin: 0; padding: 24px; box-shadow: none; border: none;
+    }
+    body.printing-schedule .schedule-actions,
+    body.printing-schedule .schedule-status,
+    body.printing-schedule #scheduleTeamFilter { display: none !important; }
   }
   @media (max-width: 640px) {
     .form-row, .invoice-doc-parties, .invoice-doc-pay { grid-template-columns: 1fr; }
@@ -973,6 +1043,9 @@
     .invoice-doc { padding: 28px 20px; }
     .email-doc { padding: 26px 18px; }
     .email-doc-meta div span:first-child { width: 44px; }
+    .team-row-top, .facility-row { grid-template-columns: 1fr; row-gap: 6px; }
+    .team-meta, .facility-row input { text-align: left; }
+    .schedule-toolbar { flex-direction: column; align-items: stretch; }
   }
 </style>
 
@@ -1331,11 +1404,11 @@
       <div class="page-head">
         <div>
           <h1>Schemaplanering</h1>
-          <div class="sub">Kanslio bygger tränings- och matchscheman utifrån lagens preferenser</div>
+          <div class="sub">Kanslio bygger tränings- och matchscheman utifrån lagens önskemål och anläggningarnas tillgänglighet</div>
         </div>
-        <button class="btn-primary">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          Nytt lag
+        <button class="btn-primary" id="generateScheduleBtn" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3z"/><path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14z"/></svg>
+          Generera schema
         </button>
       </div>
 
@@ -1344,8 +1417,8 @@
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="15" r="5.5"/><circle cx="9" cy="15" r="1.4" fill="currentColor" stroke="none"/><path d="M13.2 11.2L19 5.5M19 5.5h-4.3M19 5.5v4.3"/></svg>
         </div>
         <div class="mail-hero-text">
-          <h2>Kanslio planerar veckans pass automatiskt</h2>
-          <p>Utifrån varje lags preferenser — antal pass, planunderlag och prioritet vid krockar.</p>
+          <h2>Kanslio planerar alla lags pass automatiskt</h2>
+          <p>Utifrån varje lags önskemål, prioritet och anläggningarnas lediga tider — utan schemakrockar.</p>
         </div>
         <button class="btn-primary" data-goto="kalender">
           Visa i kalendern
@@ -1354,13 +1427,94 @@
       </div>
 
       <div class="card card-pad">
-        <div class="card-head"><h2>Lagens preferenser</h2></div>
+        <div class="card-head"><h2>Lagöversikt</h2></div>
+        <div class="sub-note">Klicka på ett lag för att se och ändra dess önskemål och förutsättningar.</div>
         <div id="teamList"></div>
       </div>
 
       <div class="card card-pad">
-        <div class="card-head"><h2>Föreslaget veckoschema</h2></div>
-        <div class="week-grid" id="scheduleGrid"></div>
+        <div class="card-head"><h2>Anläggningar och planer</h2></div>
+        <div class="sub-note">Ange tillgängliga tider och eventuella begränsningar för varje anläggning.</div>
+        <div id="facilityList"></div>
+      </div>
+
+      <div class="card card-pad" id="scheduleResultCard">
+        <div class="card-head">
+          <h2>Genererat schema</h2>
+          <div class="schedule-generated-at" id="scheduleGeneratedAt"></div>
+        </div>
+
+        <div class="schedule-toolbar">
+          <div class="pill-filters" id="scheduleViewFilters">
+            <button class="pill-filter active" data-view="vecka">Veckoschema</button>
+            <button class="pill-filter" data-view="manad">Månadsschema</button>
+            <button class="pill-filter" data-view="framtid">Simulerade framtida scheman</button>
+          </div>
+          <select id="scheduleTeamFilter" class="schedule-team-select">
+            <option value="alla">Kalender för: Alla lag</option>
+          </select>
+        </div>
+
+        <div id="scheduleWeekView" class="week-grid"></div>
+        <div id="scheduleMonthView" style="display:none;"></div>
+        <div id="scheduleFutureView" style="display:none;"></div>
+
+        <div class="schedule-actions">
+          <button class="btn-primary" id="publishCalendarBtn" type="button">Publicera kalender</button>
+          <button class="btn-ghost" id="saveScheduleBtn" type="button">Spara på datorn</button>
+          <button class="btn-ghost" id="downloadScheduleBtn" type="button">Ladda ner (CSV / Excel)</button>
+          <button class="btn-ghost" id="printScheduleBtn" type="button">Skriv ut / Spara som PDF</button>
+          <button class="btn-ghost" id="publishWebsiteBtn" type="button">Publicera på webbplats</button>
+        </div>
+        <div class="schedule-status" id="scheduleStatus"></div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="card-head">
+          <h2>Föreningsinställningar</h2>
+          <button class="link" id="settingsToggle" type="button">Visa inställningar
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+        </div>
+        <div class="settings-panel" id="settingsPanel">
+          <div class="form-row">
+            <div class="form-field">
+              <label for="newTeamName">Lägg till lag</label>
+              <input type="text" id="newTeamName" placeholder="T.ex. P8">
+            </div>
+            <div class="form-field">
+              <label for="newTeamCategory">Kategori</label>
+              <select id="newTeamCategory">
+                <option>Herrlag</option>
+                <option>Damlag</option>
+                <option>Ungdom</option>
+                <option>Veteran</option>
+                <option>Övrigt</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-primary" id="addTeamBtn" type="button">+ Lägg till lag</button>
+
+          <div class="settings-stats">
+            <div class="settings-stat">
+              <span>Antal lag i föreningen</span>
+              <strong id="teamCountStat">0</strong>
+            </div>
+            <div class="settings-stat">
+              <span>Standardprioritet för nya lag</span>
+              <select id="defaultPriority">
+                <option value="hog">Hög</option>
+                <option value="medel" selected>Normal</option>
+                <option value="lag">Låg</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>Årskullar och lagkategorier</label>
+            <div class="settings-categories" id="categoryTags"></div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1627,40 +1781,27 @@
       draft: 'Ny medlem registrerad denna vecka — medlemsavgift 800 kr för Fotboll P10, klar att skicka så snart du granskat den.' },
   ];
 
-  const TEAMS = [
-    { name: 'Herrlaget A', note: 'Har alltid förtur vid schemakrockar', freq: '4 pass/vecka', facility: 'Helplan · Naturgräs', priority: 'hog' },
-    { name: 'Damlaget A', note: 'Extra pass inför matchvecka', freq: '3 pass/vecka', facility: 'Helplan · Konstgräs', priority: 'hog' },
-    { name: 'Flickor P10', note: 'Tisdag och torsdag om möjligt', freq: '3 pass/vecka', facility: 'Helplan · Konstgräs', priority: 'medel' },
-    { name: 'Pojkar P12', note: 'Ej samtidigt som Flickor P10', freq: '3 pass/vecka', facility: 'Halvplan · Konstgräs', priority: 'medel' },
-    { name: 'Innebandy P14', note: 'Kväll efter skolslut', freq: '2 pass/vecka', facility: 'Sporthallen', priority: 'medel' },
-    { name: 'Veteranlaget', note: 'Endast kvällstid efter 20:00', freq: '1 pass/vecka', facility: 'Halvplan · Grus', priority: 'lag' },
+  // ---- Schemaplanering: lag, anläggningar och schemagenerering ----
+  const DAY_NAMES = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre'];
+
+  const FACILITIES = [
+    { name: 'A-plan', surface: 'Naturgräs', availability: 'Vardagar 16:00–21:00', note: 'Prioriteras av Herrlag och Damlag' },
+    { name: 'B-plan', surface: 'Naturgräs', availability: 'Vardagar 16:00–20:00', note: '' },
+    { name: 'Konstgräsplan', surface: 'Konstgräs', availability: 'Alla dagar 07:00–22:00', note: 'Belyst för kvällsträning' },
+    { name: 'Träningsplan 1', surface: 'Konstgräs', availability: 'Vardagar 16:00–20:00', note: '' },
+    { name: 'Träningsplan 2', surface: 'Naturgräs', availability: 'Vardagar 16:00–19:00', note: 'Stängd vid regn' },
+    { name: 'Inomhushall', surface: 'Inomhus', availability: 'Alla dagar 07:00–22:00', note: 'Delas med innebandy och handboll' },
   ];
 
-  const SCHEDULE_PREVIEW = [
-    { name: 'Mån', num: 20, events: [
-      { time: '17:00', title: 'Flickor P10 – träning', kind: 'deadline' },
-      { time: '18:30', title: 'Herrlaget A – träning', kind: 'deadline' },
-      { time: '20:00', title: 'Veteranlaget – träning', kind: 'internal' },
-    ]},
-    { name: 'Tis', num: 21, events: [
-      { time: '17:00', title: 'Pojkar P12 – träning', kind: 'internal' },
-      { time: '18:00', title: 'Innebandy P14 – träning', kind: 'internal' },
-      { time: '19:00', title: 'Herrlaget A – träning', kind: 'deadline' },
-    ]},
-    { name: 'Ons', num: 22, events: [
-      { time: '17:00', title: 'Flickor P10 – träning', kind: 'deadline' },
-      { time: '19:00', title: 'Damlaget A – träning', kind: 'meeting' },
-    ]},
-    { name: 'Tor', num: 23, events: [
-      { time: '17:00', title: 'Pojkar P12 – träning', kind: 'internal' },
-      { time: '18:00', title: 'Innebandy P14 – träning', kind: 'internal' },
-      { time: '19:00', title: 'Herrlaget A – träning', kind: 'deadline' },
-    ]},
-    { name: 'Fre', num: 24, events: [
-      { time: '17:00', title: 'Flickor P10 – träning', kind: 'deadline' },
-      { time: '18:30', title: 'Herrlaget A – match', kind: 'deadline' },
-      { time: '19:30', title: 'Damlaget A – träning', kind: 'meeting' },
-    ]},
+  const TEAMS = [
+    { name: 'Herrlag', category: 'Herrlag', freq: 5, preferredDays: ['Mån', 'Tis', 'Ons', 'Tor', 'Fre'], blockedDays: [], time: '17:00', facility: 'A-plan', surface: 'Naturgräs', priority: 'hog' },
+    { name: 'Damlag', category: 'Damlag', freq: 4, preferredDays: ['Mån', 'Ons', 'Tor', 'Fre'], blockedDays: [], time: '17:00', facility: 'A-plan', surface: 'Naturgräs', priority: 'hog' },
+    { name: 'P13', category: 'Ungdom', freq: 3, preferredDays: ['Mån', 'Ons', 'Fre'], blockedDays: [], time: '16:00', facility: 'Konstgräsplan', surface: 'Konstgräs', priority: 'medel' },
+    { name: 'P10', category: 'Ungdom', freq: 2, preferredDays: ['Tis', 'Tor'], blockedDays: [], time: '16:00', facility: 'Träningsplan 1', surface: 'Konstgräs', priority: 'medel' },
+    { name: 'P9', category: 'Ungdom', freq: 2, preferredDays: ['Ons', 'Fre'], blockedDays: [], time: '16:00', facility: 'Träningsplan 2', surface: 'Naturgräs', priority: 'medel' },
+    { name: 'F19', category: 'Ungdom', freq: 3, preferredDays: ['Mån', 'Ons', 'Fre'], blockedDays: [], time: '18:00', facility: 'Konstgräsplan', surface: 'Konstgräs', priority: 'medel' },
+    { name: 'Veteranlag', category: 'Veteran', freq: 1, preferredDays: ['Tis'], blockedDays: [], time: '20:00', facility: 'B-plan', surface: 'Naturgräs', priority: 'lag' },
+    { name: 'Övriga lag', category: 'Övrigt', freq: 1, preferredDays: ['Tor'], blockedDays: [], time: '19:00', facility: 'Inomhushall', surface: 'Inomhus', priority: 'lag' },
   ];
 
   const MAIL = [
@@ -2628,32 +2769,407 @@ Kansliet, Västerås SK</div>
     });
   }
 
-  function renderTeams() {
-    const prioLabel = { hog: 'Hög prioritet', medel: 'Normal prioritet', lag: 'Låg prioritet' };
-    document.getElementById('teamList').innerHTML = TEAMS.map((t, idx) => `
-      <div class="team-row reveal" ${revealDelay(idx)}>
-        <div>
-          <div class="team-name">${t.name}</div>
-          <div class="team-note">${t.note}</div>
-        </div>
-        <span class="priority-chip priority-${t.priority}">${prioLabel[t.priority]}</span>
-        <div class="team-meta">${t.freq}</div>
-        <div class="team-meta">${t.facility}</div>
-      </div>`).join('');
+  const PRIO_LABEL = { hog: 'Hög prioritet', medel: 'Normal prioritet', lag: 'Låg prioritet' };
+
+  function dayPickerHTML(team) {
+    return DAY_NAMES.map(day => {
+      const isBlocked = team.blockedDays.includes(day);
+      const isPreferred = !isBlocked && team.preferredDays.includes(day);
+      const cls = isBlocked ? 'blocked' : isPreferred ? 'active' : '';
+      return `<button type="button" class="day-chip ${cls}" data-day="${day}">${day}</button>`;
+    }).join('');
   }
 
-  function renderSchedule() {
-    document.getElementById('scheduleGrid').innerHTML = SCHEDULE_PREVIEW.map((day, idx) => `
-      <div class="day-col reveal" ${revealDelay(idx)}>
-        <div class="day-head">
-          <div class="name">${day.name}</div>
-          <div class="num tabular">${day.num}</div>
+  function teamDetailHTML(t, idx) {
+    const facilityOptions = FACILITIES.map(f =>
+      `<option value="${f.name}" ${f.name === t.facility ? 'selected' : ''}>${f.name}</option>`).join('');
+    const surfaceOptions = ['Konstgräs', 'Naturgräs', 'Inomhushall'].map(s =>
+      `<option value="${s}" ${s === t.surface ? 'selected' : ''}>${s}</option>`).join('');
+    const priorityOptions = [['hog', 'Hög'], ['medel', 'Normal'], ['lag', 'Låg']].map(([v, l]) =>
+      `<option value="${v}" ${v === t.priority ? 'selected' : ''}>${l}</option>`).join('');
+    return `
+      <div class="mail-detail">
+        <div class="detail-label">Önskemål och förutsättningar</div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Antal träningar per vecka</label>
+            <input type="number" min="1" max="5" id="teamFreq-${idx}" value="${t.freq}">
+          </div>
+          <div class="form-field">
+            <label>Önskad träningstid</label>
+            <input type="text" id="teamTime-${idx}" value="${t.time}">
+          </div>
         </div>
-        ${day.events.map(e => `
-          <div class="event-block event-${e.kind}">
-            <span class="time tabular">${e.time}</span>${e.title}
-          </div>`).join('')}
+        <div class="day-picker-label">Dagar — klicka: önskad dag → dag laget inte kan träna → neutral</div>
+        <div class="day-picker" id="teamDays-${idx}">${dayPickerHTML(t)}</div>
+        <div class="form-row" style="margin-top:16px;">
+          <div class="form-field">
+            <label>Prioriterad anläggning</label>
+            <select id="teamFacility-${idx}">${facilityOptions}</select>
+          </div>
+          <div class="form-field">
+            <label>Underlag</label>
+            <select id="teamSurface-${idx}">${surfaceOptions}</select>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Prioritetsnivå jämfört med andra lag</label>
+          <select id="teamPriority-${idx}">${priorityOptions}</select>
+        </div>
+        <div class="detail-actions">
+          <button class="btn-primary" type="button" data-save-team="${idx}">Spara ändringar</button>
+        </div>
+      </div>`;
+  }
+
+  function renderTeams() {
+    document.getElementById('teamList').innerHTML = TEAMS.map((t, idx) => `
+      <div class="team-row reveal" ${revealDelay(idx)} data-idx="${idx}">
+        <div class="team-row-top">
+          <div>
+            <div class="team-name">${t.name}</div>
+            <div class="team-note">${t.freq} pass/vecka · ${t.preferredDays.join(', ') || 'inga dagar valda'}</div>
+          </div>
+          <span class="priority-chip priority-${t.priority}">${PRIO_LABEL[t.priority]}</span>
+          <div class="team-meta">${t.time}</div>
+          <div class="team-meta">${t.facility}</div>
+          <svg class="mail-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        ${teamDetailHTML(t, idx)}
       </div>`).join('');
+
+    document.querySelectorAll('#teamList .team-row').forEach(row => {
+      const idx = parseInt(row.dataset.idx, 10);
+      row.querySelector('.team-row-top').addEventListener('click', () => row.classList.toggle('open'));
+
+      row.querySelectorAll('.day-chip').forEach(chip => {
+        chip.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (chip.classList.contains('active')) {
+            chip.classList.remove('active');
+            chip.classList.add('blocked');
+          } else if (chip.classList.contains('blocked')) {
+            chip.classList.remove('blocked');
+          } else {
+            chip.classList.add('active');
+          }
+        });
+      });
+
+      const saveBtn = row.querySelector('[data-save-team]');
+      saveBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        saveTeamPreferences(idx, row);
+      });
+    });
+
+    observeReveals();
+    populateScheduleTeamFilter();
+    renderCategoryTags();
+    const countStat = document.getElementById('teamCountStat');
+    if (countStat) countStat.textContent = TEAMS.length;
+  }
+
+  function saveTeamPreferences(idx, row) {
+    const t = TEAMS[idx];
+    if (!t) return;
+    t.freq = parseInt(document.getElementById(`teamFreq-${idx}`).value, 10) || 1;
+    t.time = document.getElementById(`teamTime-${idx}`).value.trim() || t.time;
+    t.facility = document.getElementById(`teamFacility-${idx}`).value;
+    t.surface = document.getElementById(`teamSurface-${idx}`).value;
+    t.priority = document.getElementById(`teamPriority-${idx}`).value;
+
+    const preferred = [], blocked = [];
+    row.querySelectorAll(`#teamDays-${idx} .day-chip`).forEach(chip => {
+      if (chip.classList.contains('active')) preferred.push(chip.dataset.day);
+      else if (chip.classList.contains('blocked')) blocked.push(chip.dataset.day);
+    });
+    t.preferredDays = preferred;
+    t.blockedDays = blocked;
+
+    renderTeams();
+  }
+
+  function renderFacilities() {
+    document.getElementById('facilityList').innerHTML = FACILITIES.map((f, idx) => `
+      <div class="facility-row reveal" ${revealDelay(idx)}>
+        <div>
+          <div class="facility-name">${f.name}</div>
+          <div class="facility-surface">${f.surface}</div>
+        </div>
+        <div></div>
+        <input type="text" data-facility-availability="${idx}" value="${f.availability}" placeholder="Tillgängliga tider">
+        <input type="text" data-facility-note="${idx}" value="${f.note}" placeholder="Begränsningar">
+      </div>`).join('');
+
+    document.querySelectorAll('[data-facility-availability]').forEach(input => {
+      input.addEventListener('change', () => {
+        FACILITIES[parseInt(input.dataset.facilityAvailability, 10)].availability = input.value.trim();
+      });
+    });
+    document.querySelectorAll('[data-facility-note]').forEach(input => {
+      input.addEventListener('change', () => {
+        FACILITIES[parseInt(input.dataset.facilityNote, 10)].note = input.value.trim();
+      });
+    });
+    observeReveals();
+  }
+
+  function renderCategoryTags() {
+    const el = document.getElementById('categoryTags');
+    if (!el) return;
+    const categories = [...new Set(TEAMS.map(t => t.category))];
+    el.innerHTML = categories.map(c => `<span class="category-tag">${c}</span>`).join('');
+  }
+
+  // ---- Automatisk schemagenerering ----
+  let generatedSchedule = null;
+  let scheduleViewMode = 'vecka';
+  let scheduleTeamFilterValue = 'alla';
+
+  function generateSchedule() {
+    const priorityOrder = { hog: 0, medel: 1, lag: 2 };
+    const sortedTeams = [...TEAMS].sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+    const days = DAY_NAMES.map((name, i) => ({ name, num: 20 + i, events: [] }));
+    const bookedSlots = new Set();
+
+    sortedTeams.forEach(team => {
+      let assigned = 0;
+      const candidateDays = team.preferredDays.filter(d => !team.blockedDays.includes(d));
+      for (const day of candidateDays) {
+        if (assigned >= team.freq) break;
+        const key = `${day}|${team.facility}|${team.time}`;
+        if (bookedSlots.has(key)) continue;
+        bookedSlots.add(key);
+        const dayObj = days.find(d => d.name === day);
+        if (dayObj) {
+          dayObj.events.push({
+            time: team.time,
+            title: `${team.name} – träning`,
+            kind: team.priority === 'hog' ? 'deadline' : team.priority === 'medel' ? 'internal' : 'meeting',
+            team: team.name,
+            facility: team.facility,
+          });
+        }
+        assigned++;
+      }
+    });
+
+    days.forEach(d => d.events.sort((a, b) => a.time.localeCompare(b.time)));
+    generatedSchedule = { generatedAt: new Date(), days };
+    return generatedSchedule;
+  }
+
+  function populateScheduleTeamFilter() {
+    const select = document.getElementById('scheduleTeamFilter');
+    if (!select) return;
+    const current = select.value || 'alla';
+    select.innerHTML = '<option value="alla">Kalender för: Alla lag</option>' +
+      TEAMS.map(t => `<option value="${t.name}">Kalender för: ${t.name}</option>`).join('');
+    select.value = [...select.options].some(o => o.value === current) ? current : 'alla';
+  }
+
+  function renderScheduleWeekView() {
+    const grid = document.getElementById('scheduleWeekView');
+    if (!grid || !generatedSchedule) return;
+    grid.innerHTML = generatedSchedule.days.map((day, idx) => {
+      const events = scheduleTeamFilterValue === 'alla'
+        ? day.events
+        : day.events.filter(e => e.team === scheduleTeamFilterValue);
+      return `
+        <div class="day-col reveal" ${revealDelay(idx)}>
+          <div class="day-head">
+            <div class="name">${day.name}</div>
+            <div class="num tabular">${day.num}</div>
+          </div>
+          ${events.length ? events.map(e => `
+            <div class="event-block event-${e.kind}">
+              <span class="time tabular">${e.time}</span>${e.title}
+            </div>`).join('') : '<div class="day-empty">Inga pass</div>'}
+        </div>`;
+    }).join('');
+    observeReveals();
+  }
+
+  function renderScheduleMonthView() {
+    const el = document.getElementById('scheduleMonthView');
+    if (!el || !generatedSchedule) return;
+    const passPerWeek = generatedSchedule.days.reduce((sum, d) => sum + d.events.length, 0);
+    const weeks = [30, 31, 32, 33];
+    el.innerHTML = `
+      <table class="schedule-summary-table">
+        <thead><tr><th>Vecka</th><th>Antal pass</th><th>Notering</th></tr></thead>
+        <tbody>
+          ${weeks.map((w, i) => `
+            <tr>
+              <td>Vecka ${w}</td>
+              <td class="tabular">${passPerWeek}</td>
+              <td>${i === 0 ? 'Byggd på nuvarande veckoschema ovan' : 'Följer samma mönster som veckoschemat'}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function renderScheduleFutureView() {
+    const el = document.getElementById('scheduleFutureView');
+    if (!el || !generatedSchedule) return;
+    const passPerWeek = generatedSchedule.days.reduce((sum, d) => sum + d.events.length, 0);
+    const weeks = [34, 35, 36, 37, 38];
+    el.innerHTML = `
+      <table class="schedule-summary-table">
+        <thead><tr><th>Kommande vecka</th><th>Förväntat antal pass</th><th>Status</th></tr></thead>
+        <tbody>
+          ${weeks.map(w => `
+            <tr>
+              <td>Vecka ${w}</td>
+              <td class="tabular">${passPerWeek}</td>
+              <td>Simulerad utifrån nuvarande önskemål</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function renderScheduleResult() {
+    if (!generatedSchedule) return;
+    const genAt = document.getElementById('scheduleGeneratedAt');
+    if (genAt) genAt.textContent = `Genererat ${formatDateTimeSv(generatedSchedule.generatedAt)}`;
+
+    document.getElementById('scheduleWeekView').style.display = scheduleViewMode === 'vecka' ? 'grid' : 'none';
+    document.getElementById('scheduleMonthView').style.display = scheduleViewMode === 'manad' ? 'block' : 'none';
+    document.getElementById('scheduleFutureView').style.display = scheduleViewMode === 'framtid' ? 'block' : 'none';
+
+    renderScheduleWeekView();
+    renderScheduleMonthView();
+    renderScheduleFutureView();
+  }
+
+  function showScheduleStatus(text) {
+    const el = document.getElementById('scheduleStatus');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.add('show');
+    clearTimeout(el._hideTimer);
+    el._hideTimer = setTimeout(() => el.classList.remove('show'), 5000);
+  }
+
+  function publishToCalendar() {
+    if (!generatedSchedule) return;
+    const week = WEEKS[weekIndex] || WEEKS[0];
+    generatedSchedule.days.forEach(genDay => {
+      const target = week.days.find(d => d.name === genDay.name);
+      if (!target) return;
+      genDay.events.forEach(e => {
+        const exists = target.events.some(ev => ev.title === e.title && ev.time === e.time);
+        if (!exists) target.events.push({ time: e.time, title: e.title, kind: e.kind });
+      });
+    });
+    safe(renderWeek);
+    showScheduleStatus('Publicerat ✓ — kalendern är uppdaterad och synlig för alla användare.');
+  }
+
+  function downloadFile(filename, content, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function scheduleToCSV() {
+    const rows = [['Dag', 'Tid', 'Lag', 'Plan']];
+    generatedSchedule.days.forEach(day => {
+      day.events.forEach(e => rows.push([day.name, e.time, e.team, e.facility || '']));
+    });
+    return rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\r\n');
+  }
+
+  function saveScheduleLocally() {
+    if (!generatedSchedule) return;
+    const data = {
+      genererat: generatedSchedule.generatedAt,
+      dagar: generatedSchedule.days.map(d => ({ dag: d.name, pass: d.events })),
+    };
+    downloadFile(`kanslio-schema-${Date.now()}.json`, JSON.stringify(data, null, 2), 'application/json');
+    showScheduleStatus('Schemat är sparat lokalt på din dator.');
+  }
+
+  function downloadScheduleCSV() {
+    if (!generatedSchedule) return;
+    downloadFile(`kanslio-schema-${Date.now()}.csv`, scheduleToCSV(), 'text/csv;charset=utf-8');
+    showScheduleStatus('Nedladdning startad — filen öppnas direkt i Excel eller liknande.');
+  }
+
+  function printSchedule() {
+    document.body.classList.add('printing-schedule');
+    const cleanup = () => document.body.classList.remove('printing-schedule');
+    window.addEventListener('afterprint', cleanup, { once: true });
+    window.print();
+    setTimeout(cleanup, 3000);
+  }
+
+  function publishToWebsite() {
+    showScheduleStatus('Publicerat på föreningens webbplats ✓ — alla medlemmar kan nu se det uppdaterade schemat.');
+  }
+
+  function initSchedulePage() {
+    const generateBtn = document.getElementById('generateScheduleBtn');
+    if (!generateBtn) return;
+
+    generateBtn.addEventListener('click', () => {
+      generateSchedule();
+      renderScheduleResult();
+      showScheduleStatus('Nytt schema genererat utifrån lagens och anläggningarnas önskemål.');
+    });
+
+    document.getElementById('scheduleViewFilters').addEventListener('click', (e) => {
+      const btn = e.target.closest('.pill-filter');
+      if (!btn) return;
+      document.querySelectorAll('#scheduleViewFilters .pill-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      scheduleViewMode = btn.dataset.view;
+      renderScheduleResult();
+    });
+
+    document.getElementById('scheduleTeamFilter').addEventListener('change', (e) => {
+      scheduleTeamFilterValue = e.target.value;
+      renderScheduleWeekView();
+    });
+
+    document.getElementById('publishCalendarBtn').addEventListener('click', publishToCalendar);
+    document.getElementById('saveScheduleBtn').addEventListener('click', saveScheduleLocally);
+    document.getElementById('downloadScheduleBtn').addEventListener('click', downloadScheduleCSV);
+    document.getElementById('printScheduleBtn').addEventListener('click', printSchedule);
+    document.getElementById('publishWebsiteBtn').addEventListener('click', publishToWebsite);
+
+    const settingsToggleBtn = document.getElementById('settingsToggle');
+    settingsToggleBtn.addEventListener('click', () => {
+      const panel = document.getElementById('settingsPanel');
+      const open = panel.classList.toggle('open');
+      settingsToggleBtn.innerHTML = (open ? 'Dölj inställningar' : 'Visa inställningar') +
+        ' <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+    });
+
+    document.getElementById('addTeamBtn').addEventListener('click', () => {
+      const nameInput = document.getElementById('newTeamName');
+      const name = nameInput.value.trim();
+      if (!name) { nameInput.focus(); return; }
+      const category = document.getElementById('newTeamCategory').value;
+      const priority = document.getElementById('defaultPriority').value;
+      TEAMS.push({
+        name, category, freq: 2, preferredDays: [], blockedDays: [], time: '17:00',
+        facility: FACILITIES[0].name, surface: FACILITIES[0].surface, priority,
+      });
+      nameInput.value = '';
+      renderTeams();
+    });
+
+    // Generera ett första schema direkt så resultatkortet inte är tomt.
+    generateSchedule();
+    renderScheduleResult();
   }
 
   function renderTimeSaved() {
@@ -3002,7 +3518,8 @@ Kansliet, Västerås SK</div>
   safe(renderProgress);
   safe(initMissionToggle);
   safe(renderTeams);
-  safe(renderSchedule);
+  safe(renderFacilities);
+  safe(initSchedulePage);
   safe(initTabs);
   safe(initFilters);
   safe(initWeekNav);
