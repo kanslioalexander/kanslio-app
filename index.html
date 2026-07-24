@@ -893,7 +893,12 @@
   .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color: var(--accent); }
   .form-field textarea { resize: vertical; min-height: 140px; line-height: 1.5; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+  .form-actions { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+
+  #mailKeywords { min-height: 70px; }
+  .mail-generated-fields { display: none; }
+  .mail-generated-fields.show { display: block; }
+  .mail-generating { font-size: 13px; font-weight: 700; color: var(--accent-strong); }
 
   .invoice-doc {
     background: #FFFFFF; color: #16223E; border-radius: var(--r-lg); box-shadow: var(--shadow-lg);
@@ -1473,7 +1478,7 @@
     <div class="modal-head">
       <div>
         <h2>Nytt mejl</h2>
-        <p>Skriv mejlet här — det skickas direkt från kansliets Outlook.</p>
+        <p>Skriv några stödord — Kanslio skriver ett komplett mejl åt dig.</p>
       </div>
       <button class="modal-close" id="mailFormClose" aria-label="Stäng">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
@@ -1485,16 +1490,30 @@
         <input type="email" id="mailTill" required>
       </div>
       <div class="form-field">
-        <label for="mailAmne">Ämne</label>
-        <input type="text" id="mailAmne" required>
+        <label for="mailKeywords">Vad ska mejlet handla om? (några stödord)</label>
+        <textarea id="mailKeywords" placeholder="T.ex. medlemsavgift, startdatum, välkommen till klubben" required></textarea>
       </div>
-      <div class="form-field">
-        <label for="mailMeddelande">Meddelande</label>
-        <textarea id="mailMeddelande" required></textarea>
+
+      <div class="mail-generated-fields" id="mailGeneratedFields">
+        <div class="form-field">
+          <label for="mailAmne">Ämne</label>
+          <input type="text" id="mailAmne">
+        </div>
+        <div class="form-field">
+          <label for="mailMeddelande">Meddelande</label>
+          <textarea id="mailMeddelande"></textarea>
+        </div>
       </div>
+
       <div class="form-actions">
         <button type="button" class="btn-ghost" id="mailFormCancel">Avbryt</button>
-        <button type="submit" class="btn-primary">Förhandsgranska</button>
+        <button type="button" class="btn-ghost" id="mailRegenerateBtn" style="display:none;">Generera igen</button>
+        <span class="mail-generating" id="mailGenerating" style="display:none;">Genererar…</span>
+        <button type="button" class="btn-primary" id="mailGenerateBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3z"/><path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14z"/></svg>
+          AI-generera
+        </button>
+        <button type="submit" class="btn-primary" id="mailPreviewBtn" style="display:none;">Förhandsgranska</button>
       </div>
     </form>
   </div>
@@ -2420,18 +2439,18 @@
     });
   }
 
-  // ---- Nytt mejl: skriv och skicka ett riktigt mejl utan att lämna appen ----
+  // ---- Nytt mejl: stödord -> AI-genererat mejl -> skicka ----
   const MAIL_EXAMPLES = [
-    { till: 'familjen.dahlberg@gmail.com', amne: 'Välkommen till klubben!',
-      meddelande: 'Hej familjen Dahlberg!\n\nVarmt välkomna till Västerås SK! Vi är glada att Liam ska spela med oss i P11 från och med hösten.\n\nFörsta träningen är tisdag 4 augusti kl. 17:30 på Björkhallens konstgräsplan. Ta med vattenflaska och fotbollsskor — matchtröja delas ut på plats.\n\nHör gärna av er om ni har några frågor innan dess!' },
-    { till: 'fritid@vasteras.se', amne: 'Fråga om lediga halltider i höst',
-      meddelande: 'Hej,\n\nVi planerar innebandysektionens träningsschema för höstterminen och undrar om det finns lediga tider i Björkhallen på tisdagar eller torsdagar mellan 17:00–20:00.\n\nTacksam för besked så snart som möjligt så vi kan lägga vårt schema.' },
-    { till: 'sponsor@byggmax.se', amne: 'Tack för säsongen – förslag på fortsatt samarbete',
-      meddelande: 'Hej,\n\nVi vill börja med att tacka för ert fina stöd under säsongen som gått — det har betytt mycket för våra ungdomslag.\n\nVi skulle gärna fortsätta samarbetet inför 2026/2027 och bifogar ett förslag på förnyat sponsoravtal. Hör gärna av er om ni vill boka ett kort avstämningsmöte.' },
-    { till: 'ledare.p12@vasterassk.se', amne: 'Schemaändring inför helgen',
-      meddelande: 'Hej!\n\nLördagens träning för P12 behöver flyttas från 10:00 till 12:00 på grund av en matchbokning i hallen.\n\nKan du meddela föräldragruppen? Hör av dig om tiden krockar med något.' },
-    { till: 'domaransvarig@fotbollsdistriktet.se', amne: 'Domarbehov höstens seriematcher',
-      meddelande: 'Hej,\n\nBifogar vårt matchschema för höstens seriematcher. Vi behöver domare till samtliga hemmamatcher enligt schemat, med start helgen 15–16 augusti.\n\nHör av er om något saknas eller behöver kompletteras.' },
+    { till: 'familjen.dahlberg@gmail.com',
+      keywords: 'välkommen till klubben, Liam spelar P11, första träningen tisdag 4 augusti 17:30, Björkhallen konstgräs' },
+    { till: 'fritid@vasteras.se',
+      keywords: 'fråga om lediga halltider i höst, tisdagar eller torsdagar 17-20, Björkhallen' },
+    { till: 'sponsor@byggmax.se',
+      keywords: 'tack för stödet denna säsong, förslag på förnyat sponsoravtal 2026/2027, boka avstämningsmöte' },
+    { till: 'ledare.p12@vasterassk.se',
+      keywords: 'schemaändring lördag, flytta träningen från 10:00 till 12:00, matchbokning i hallen' },
+    { till: 'domaransvarig@fotbollsdistriktet.se',
+      keywords: 'matchschema hösten, domarbehov till samtliga hemmamatcher, start helgen 15-16 augusti' },
   ];
   let mailExampleIndex = 0;
 
@@ -2439,6 +2458,41 @@
     const ex = MAIL_EXAMPLES[mailExampleIndex % MAIL_EXAMPLES.length];
     mailExampleIndex++;
     return ex;
+  }
+
+  function generateEmailFromKeywords(keywordsRaw) {
+    const list = keywordsRaw.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
+    const words = list.length ? list : [keywordsRaw.trim()];
+    const lower = keywordsRaw.toLowerCase();
+    const topic = words.join(', ');
+
+    const subject = words.slice(0, 3)
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' – ');
+
+    let opener, closer;
+    if (/tack|tacka/.test(lower)) {
+      opener = `Jag vill börja med att tacka för ${words[0].toLowerCase()} — det har betytt mycket för föreningen.`;
+      closer = 'Hör gärna av dig om du har några frågor.';
+    } else if (/välkom/.test(lower)) {
+      opener = `Varmt välkomna! Det här mejlet handlar om ${topic}.`;
+      closer = 'Hör gärna av er om ni har några frågor innan dess.';
+    } else if (/möte|boka|tid|schema|träning|flytta|ändr/.test(lower)) {
+      opener = `Jag hör av mig angående ${topic}.`;
+      closer = 'Säg till om tiden inte passar, så hittar vi en lösning tillsammans.';
+    } else if (/fråga|undrar|check|kolla/.test(lower)) {
+      opener = `Jag skriver för att fråga om ${topic}.`;
+      closer = 'Tacksam för besked när du har möjlighet.';
+    } else if (/faktura|betalning|avgift|kostnad/.test(lower)) {
+      opener = `Det här mejlet gäller ${topic}.`;
+      closer = 'Hör av dig om något är oklart eller behöver justeras.';
+    } else {
+      opener = `Jag skriver angående ${topic}.`;
+      closer = 'Säg gärna till om du har några frågor eller behöver mer information.';
+    }
+
+    const meddelande = `Hej,\n\n${opener}\n\n${closer}\n\nMed vänliga hälsningar\nErik Söderberg\nVästerås SK`;
+    return { amne: subject, meddelande };
   }
 
   function formatDateTimeSv(d) {
@@ -2478,15 +2532,54 @@ Kansliet, Västerås SK</div>
     const form = document.getElementById('mailForm');
     if (!openBtn || !formOverlay || !previewOverlay || !form) return;
 
+    const keywordsField = document.getElementById('mailKeywords');
+    const amneField = document.getElementById('mailAmne');
+    const meddelandeField = document.getElementById('mailMeddelande');
+    const generatedFields = document.getElementById('mailGeneratedFields');
+    const generateBtn = document.getElementById('mailGenerateBtn');
+    const regenerateBtn = document.getElementById('mailRegenerateBtn');
+    const previewBtn = document.getElementById('mailPreviewBtn');
+    const generatingLabel = document.getElementById('mailGenerating');
+
+    function resetGenerationState() {
+      generatedFields.classList.remove('show');
+      amneField.value = '';
+      meddelandeField.value = '';
+      generateBtn.style.display = '';
+      regenerateBtn.style.display = 'none';
+      previewBtn.style.display = 'none';
+      generatingLabel.style.display = 'none';
+    }
+
     function openForm() {
       const ex = nextMailExample();
       document.getElementById('mailTill').value = ex.till;
-      document.getElementById('mailAmne').value = ex.amne;
-      document.getElementById('mailMeddelande').value = ex.meddelande;
+      keywordsField.value = ex.keywords;
+      resetGenerationState();
       formOverlay.classList.add('open');
     }
     function closeForm() { formOverlay.classList.remove('open'); }
     function closePreview() { previewOverlay.classList.remove('open'); }
+
+    function runGeneration() {
+      const kw = keywordsField.value.trim();
+      if (!kw) { keywordsField.focus(); return; }
+      generateBtn.disabled = true;
+      regenerateBtn.disabled = true;
+      generatingLabel.style.display = '';
+      setTimeout(() => {
+        const generated = generateEmailFromKeywords(kw);
+        amneField.value = generated.amne;
+        meddelandeField.value = generated.meddelande;
+        generatedFields.classList.add('show');
+        generateBtn.style.display = 'none';
+        regenerateBtn.style.display = '';
+        previewBtn.style.display = '';
+        generateBtn.disabled = false;
+        regenerateBtn.disabled = false;
+        generatingLabel.style.display = 'none';
+      }, 650);
+    }
 
     openBtn.addEventListener('click', openForm);
     document.getElementById('mailFormClose').addEventListener('click', closeForm);
@@ -2499,11 +2592,15 @@ Kansliet, Västerås SK</div>
       closePreview();
     });
 
+    generateBtn.addEventListener('click', runGeneration);
+    regenerateBtn.addEventListener('click', runGeneration);
+
     form.addEventListener('submit', (e) => {
       e.preventDefault();
+      if (!generatedFields.classList.contains('show')) return;
       const till = document.getElementById('mailTill').value.trim();
-      const amne = document.getElementById('mailAmne').value.trim();
-      const meddelande = document.getElementById('mailMeddelande').value.trim();
+      const amne = amneField.value.trim();
+      const meddelande = meddelandeField.value.trim();
       const mail = { till, amne, meddelande, datum: new Date() };
 
       document.getElementById('mailDoc').innerHTML = buildEmailDocHTML(mail);
