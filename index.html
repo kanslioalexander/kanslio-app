@@ -757,6 +757,23 @@
   .info-row-label { font-size: 12px; color: var(--ink-muted); font-weight: 600; }
   .info-row-value { font-size: 13.5px; color: var(--ink); font-weight: 600; margin-top: 2px; }
 
+  #faqFilters { margin-bottom: 4px; }
+  .faq-group { margin-top: 24px; }
+  .faq-group:first-of-type { margin-top: 4px; }
+  .faq-group-title { font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-muted); margin-bottom: 10px; }
+  .faq-item { border: 1px solid var(--border); border-radius: var(--r-md); margin-bottom: 10px; overflow: hidden; background: var(--surface); }
+  .faq-question {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 16px; background: none; border: none; text-align: left;
+    font-size: 14px; font-weight: 700; color: var(--ink); cursor: pointer; font-family: inherit;
+  }
+  .faq-question:hover { background: var(--bg-soft); }
+  .faq-question .chev { flex-shrink: 0; color: var(--ink-muted); transition: transform .2s ease; }
+  .faq-item.open .faq-question .chev { transform: rotate(180deg); }
+  .faq-answer { max-height: 0; overflow: hidden; transition: max-height .25s ease; }
+  .faq-item.open .faq-answer { max-height: 480px; }
+  .faq-answer-inner { padding: 0 16px 16px; font-size: 13.5px; color: var(--ink-secondary); line-height: 1.55; }
+
   /* ---------- Chat ---------- */
   .chat-launcher {
     position: fixed; bottom: 26px; right: 26px; z-index: 50;
@@ -1932,6 +1949,12 @@
           <div id="usefulInfoList"></div>
         </div>
       </div>
+
+      <div class="card card-pad reveal">
+        <div class="card-head"><h2>Vanliga frågor</h2></div>
+        <div class="pill-filters" id="faqFilters"></div>
+        <div id="faqList"></div>
+      </div>
     </section>
   </main>
   </div>
@@ -2253,6 +2276,44 @@
     shield: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V6l7-3z"/></svg>',
     contract: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>',
   };
+
+  const FAQ_CATEGORIES = [
+    { key: 'prenumeration', name: 'Prenumeration & fakturering', questions: [
+      { q: 'Vad ingår i Kanslio Pro?', a: 'Obegränsat antal AI-skrivna mejlutkast och fakturor, schemaläggning och kalender för alla lag, full statistik och rapporter samt prioriterad support. Allt ingår i samma pris, oavsett hur mycket kansliet använder det.' },
+      { q: 'Hur ofta faktureras vi?', a: 'Kanslio Pro faktureras årsvis direkt till föreningens kansli. Ni ser aktuellt pris, förnyelsedatum och antal använda platser under fliken Mitt Kanslio.' },
+      { q: 'Kan vi lägga till fler platser eller byta plan?', a: 'Ja, hör av er till er lokala kontaktperson eller till info@kanslio.com så justerar vi antalet platser eller planen inför nästa faktureringsperiod.' },
+      { q: 'Vad händer om vi säger upp prenumerationen?', a: 'Ni behåller full åtkomst ut avtalsperioden. Därefter stängs kansliets konton av och all data raderas enligt vår lagringspolicy, se avsnittet Säkerhet & data.' },
+    ]},
+    { key: 'tillgang', name: 'Tillgång & konton', questions: [
+      { q: 'Hur lägger vi till en ny person i kansliet?', a: 'En administratör bjuder in nya personer under Mitt Kanslio → Vem har tillgång till Kanslio. Den nya personen får ett mejl med instruktioner för att skapa sitt konto.' },
+      { q: 'Vad är skillnaden mellan Administratör, Handläggare och Läsbehörighet?', a: 'Administratör kan hantera användare, prenumeration och alla inställningar. Handläggare kan arbeta i alla flikar (mejl, fakturor, ärenden) men inte ändra kontot. Läsbehörighet ger enbart insyn, utan möjlighet att skicka eller redigera.' },
+      { q: 'Kan flera personer vara inloggade samtidigt?', a: 'Ja, samtliga platser i er plan kan vara inloggade samtidigt utan begränsning i antal sessioner.' },
+      { q: 'Hur tar vi bort en person som har slutat?', a: 'En administratör kan ta bort personens åtkomst direkt under Vem har tillgång till Kanslio. Platsen frigörs omedelbart för en ny kollega.' },
+    ]},
+    { key: 'ai', name: 'Mejl, fakturor & AI', questions: [
+      { q: 'Skickar AI:n mejl automatiskt utan att jag godkänner dem?', a: 'Nej. Kanslio skriver kompletta utkast åt er, men ett mejl eller en faktura skickas aldrig förrän en handläggare har granskat och tryckt på Skicka.' },
+      { q: 'Kan jag redigera ett AI-skrivet utkast innan jag skickar?', a: 'Ja, öppna utkastet för att läsa och redigera hela texten innan ni godkänner och skickar det.' },
+      { q: 'Är fakturorna som skapas juridiskt korrekta?', a: 'Ja, varje faktura får ett unikt fakturanummer och ett OCR-nummer med giltig Luhn-kontrollsiffra, samt tydliga betalningsvillkor enligt svensk standard.' },
+      { q: 'Kan Kanslio kopplas till vårt riktiga mejlkonto (Outlook m.fl.)?', a: 'Riktig kontokoppling är under utveckling. Idag arbetar Mejl- och Fakturor-flikarna med realistiska exempel så att ni kan se precis hur det kommer fungera när kontot är kopplat.' },
+    ]},
+    { key: 'arenden', name: 'Ärenden, kalender & schema', questions: [
+      { q: 'Hur skapar jag ett nytt ärende?', a: 'Klicka på Nytt ärende uppe till höger på Översikt eller under fliken Ärenden, fyll i uppgifterna och det dyker upp i listan direkt.' },
+      { q: 'Kan flera handläggare jobba med samma ärende?', a: 'Ja, alla handläggare i kansliet ser samma ärendelista och kan ta över eller kommentera ärenden som redan är tilldelade.' },
+      { q: 'Hur fungerar schemaläggningen vid krockar mellan lag?', a: 'Kanslio föreslår tider utifrån varje lags prioritet och flaggar automatiskt eventuella krockar i Schema-fliken innan ni bekräftar.' },
+      { q: 'Syns kalendern för alla i föreningen eller bara kansliet?', a: 'Kalendern i Kanslio är byggd för kansliets interna planering. Om ni vill publicera tider till hela föreningen exporterar ni dem till er vanliga kalenderlösning.' },
+    ]},
+    { key: 'sakerhet', name: 'Säkerhet & data', questions: [
+      { q: 'Var lagras vår data?', a: 'All data lagras hos leverantörer inom EU och hanteras enligt GDPR.' },
+      { q: 'Är Kanslio GDPR-säkert?', a: 'Ja, personuppgifter behandlas enligt GDPR och delas aldrig med tredje part utan avtal.' },
+      { q: 'Vad händer med vår data om vi avslutar prenumerationen?', a: 'Er data sparas under avtalsperioden och raderas därefter enligt vår lagringspolicy. Hör av er i förväg om ni vill ha ut en export.' },
+      { q: 'Har ni tvåfaktorsautentisering?', a: 'Det går att aktivera tvåfaktorsautentisering per konto — be er administratör slå på det under kontoinställningarna.' },
+    ]},
+    { key: 'support', name: 'Support & kontakt', questions: [
+      { q: 'Vem kontaktar vi vid faktureringsfrågor?', a: 'Kontakta er faktureringsansvarige som listas under Bra att veta, eller info@kanslio.com.' },
+      { q: 'Finns det utbildning för nya användare?', a: 'Ja, er lokala kontaktperson kan boka en genomgång för nya handläggare i kansliet.' },
+      { q: 'Vad gör vi om något inte fungerar som förväntat?', a: 'Kontakta support@kanslio.se eller er lokala kontaktperson, gärna med en skärmbild och vilken flik det gäller, så hjälper vi er så snabbt vi kan.' },
+    ]},
+  ];
 
   const KR_PER_HOUR = 320;
 
@@ -4126,6 +4187,43 @@ ${sectionsHtml}
     observeReveals();
   }
 
+  function renderFAQ(filterKey = 'alla') {
+    const cats = filterKey === 'alla' ? FAQ_CATEGORIES : FAQ_CATEGORIES.filter(c => c.key === filterKey);
+    document.getElementById('faqList').innerHTML = cats.map(cat => `
+      <div class="faq-group">
+        <div class="faq-group-title">${cat.name}</div>
+        ${cat.questions.map((item, idx) => `
+          <div class="faq-item reveal" ${revealDelay(idx)}>
+            <button class="faq-question" type="button">
+              <span>${item.q}</span>
+              <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="faq-answer"><div class="faq-answer-inner">${item.a}</div></div>
+          </div>`).join('')}
+      </div>`).join('');
+    observeReveals();
+  }
+
+  function initFAQ() {
+    const filters = document.getElementById('faqFilters');
+    filters.innerHTML = ['<button class="pill-filter active" data-cat="alla">Alla</button>']
+      .concat(FAQ_CATEGORIES.map(c => `<button class="pill-filter" data-cat="${c.key}">${c.name}</button>`))
+      .join('');
+    filters.addEventListener('click', (e) => {
+      const btn = e.target.closest('.pill-filter');
+      if (!btn) return;
+      filters.querySelectorAll('.pill-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderFAQ(btn.dataset.cat);
+    });
+    document.getElementById('faqList').addEventListener('click', (e) => {
+      const btn = e.target.closest('.faq-question');
+      if (!btn) return;
+      btn.closest('.faq-item').classList.toggle('open');
+    });
+    renderFAQ();
+  }
+
   function renderStatusBars() {
     const max = Math.max(...STATUS_BREAKDOWN.map(s => s.count));
     document.getElementById('statusBars').innerHTML = STATUS_BREAKDOWN.map((s, idx) => `
@@ -4630,6 +4728,7 @@ ${sectionsHtml}
   safe(renderSubscription);
   safe(() => renderInfoList('officeContactList', OFFICE_CONTACT));
   safe(() => renderInfoList('usefulInfoList', USEFUL_INFO));
+  safe(initFAQ);
   safe(initTabs);
   safe(initFilters);
   safe(initWeekNav);
