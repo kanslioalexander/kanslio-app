@@ -3386,7 +3386,8 @@ Kansliet, Västerås SK</div>
 
   function createDraftFromProtocol(para) {
     const recipientLabel = para.uppdragstagare === 'Kansliet' ? 'Berörd part' : para.uppdragstagare;
-    const generated = generateEmailFromKeywords(para.beslut.replace(/^Mötet beslutade att\s*/i, ''));
+    const content = para.beslut.replace(/^Mötet beslutade att\s*/i, '').replace(/[.!]+$/, '');
+    const generated = generateEmailFromKeywords(content);
     MAIL.unshift({
       outgoing: true,
       to: guessEmailForName(recipientLabel),
