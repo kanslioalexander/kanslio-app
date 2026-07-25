@@ -667,6 +667,15 @@
   }
   .saved-protocol-row:hover { background: var(--bg-soft); }
 
+  /* ---------- Nyhetsbrev ---------- */
+  #nlKeywords { min-height: 90px; }
+  .newsletter-section { padding: 14px 0; border-top: 1px solid var(--border); margin-top: 4px; }
+  .newsletter-refine-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 18px 0 4px; }
+  .newsletter-refine-label {
+    font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    color: var(--ink-muted); margin-right: 2px;
+  }
+
   /* ---------- Kalender ---------- */
   .week-nav { display: flex; align-items: center; gap: 14px; }
   .week-label { font-weight: 700; font-size: 15px; min-width: 190px; text-align: center; }
@@ -1111,6 +1120,14 @@
     }
     body.printing-protocol .schedule-actions,
     body.printing-protocol .schedule-status { display: none !important; }
+    body.printing-newsletter #nlResultCard,
+    body.printing-newsletter #nlResultCard * { visibility: visible; }
+    body.printing-newsletter #nlResultCard {
+      position: fixed; inset: 0; margin: 0; padding: 24px; box-shadow: none; border: none;
+    }
+    body.printing-newsletter .schedule-actions,
+    body.printing-newsletter .schedule-status,
+    body.printing-newsletter .newsletter-refine-row { display: none !important; }
   }
   @media (max-width: 640px) {
     .form-row, .invoice-doc-parties, .invoice-doc-pay { grid-template-columns: 1fr; }
@@ -1160,6 +1177,10 @@
       <button class="nav-item" role="tab" aria-selected="false" data-view="protokoll">
         <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8a2 2 0 012 2v14a2 2 0 01-2 2H8a2 2 0 01-2-2V5a2 2 0 012-2z"/><path d="M9 8h6M9 12h6M9 16h3"/><path d="M8 3v3h8V3"/></svg></span>
         <span class="nav-label">Protokoll</span>
+      </button>
+      <button class="nav-item" role="tab" aria-selected="false" data-view="nyhetsbrev">
+        <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a2 2 0 002 2h1l4 4V5l-4 4H5a2 2 0 00-2 2z"/><path d="M14.5 9a3 3 0 010 6"/><path d="M17.5 6.5a7 7 0 010 11"/></svg></span>
+        <span class="nav-label">Nyhetsbrev</span>
       </button>
       <button class="nav-item" role="tab" aria-selected="false" data-view="statistik">
         <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>
@@ -1668,6 +1689,92 @@
       <div class="card card-pad">
         <div class="card-head"><h2>Sparade protokoll</h2></div>
         <div id="savedProtocolList"></div>
+      </div>
+    </section>
+
+    <!-- NYHETSBREV -->
+    <section class="view" id="view-nyhetsbrev">
+      <div class="page-head">
+        <div>
+          <h1>Nyhetsbrev</h1>
+          <div class="sub">Från stödord till ett klart, professionellt medlemsutskick</div>
+        </div>
+      </div>
+
+      <div class="mail-hero reveal">
+        <div class="mail-hero-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a2 2 0 002 2h1l4 4V5l-4 4H5a2 2 0 00-2 2z"/><path d="M14.5 9a3 3 0 010 6"/><path d="M17.5 6.5a7 7 0 010 11"/></svg>
+        </div>
+        <div class="mail-hero-text">
+          <h2>Kanslio skriver nyhetsbrevet åt dig</h2>
+          <p>Klistra in några stödord — Kanslio strukturerar rubrik, ingress, sektioner och avslutning på några sekunder.</p>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="form-field">
+          <label for="nlKeywords">Stödord och tankar</label>
+          <textarea id="nlKeywords" placeholder="T.ex. Städdag 15 maj, sommartider i kansliet, anmälan till turneringen sista 10 juni"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="nlAudience">Målgrupp</label>
+            <input type="text" id="nlAudience" value="alla medlemmar">
+          </div>
+          <div class="form-field">
+            <label for="nlTitleOverride">Rubrik (valfritt)</label>
+            <input type="text" id="nlTitleOverride" placeholder="Lämna tomt för AI-förslag">
+          </div>
+        </div>
+        <button class="btn-primary" id="nlGenerateBtn" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3z"/><path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14z"/></svg>
+          Generera Nyhetsbrev
+        </button>
+      </div>
+
+      <div class="card card-pad" id="nlResultCard" style="display:none;">
+        <div class="card-head">
+          <h2>Förhandsgranskning</h2>
+          <div class="schedule-generated-at" id="nlGeneratedAt"></div>
+        </div>
+
+        <div class="form-field">
+          <label for="nlRubrik">Rubrik</label>
+          <input type="text" id="nlRubrik">
+        </div>
+        <div class="form-field">
+          <label for="nlIngress">Ingress</label>
+          <textarea id="nlIngress"></textarea>
+        </div>
+        <div id="nlSections"></div>
+        <div class="form-field">
+          <label for="nlAvslutning">Avslutning</label>
+          <textarea id="nlAvslutning"></textarea>
+        </div>
+        <div class="form-field">
+          <label for="nlCta">Call-to-action-knapp</label>
+          <input type="text" id="nlCta">
+        </div>
+
+        <div class="newsletter-refine-row">
+          <span class="newsletter-refine-label">Justera ton</span>
+          <button class="btn-ghost" type="button" data-refine="formal">Gör mer formell</button>
+          <button class="btn-ghost" type="button" data-refine="short">Korta ner</button>
+          <button class="btn-ghost" type="button" data-refine="enthusiastic">Gör mer entusiastisk</button>
+        </div>
+
+        <div class="schedule-actions">
+          <button class="btn-primary" id="nlCreateDraftBtn" type="button">Skapa e-postutkast</button>
+          <button class="btn-ghost" id="nlCopyHtmlBtn" type="button">Kopiera HTML</button>
+          <button class="btn-ghost" id="nlDownloadTextBtn" type="button">Ladda ner (Markdown)</button>
+          <button class="btn-ghost" id="nlPrintBtn" type="button">Skriv ut / Spara som PDF</button>
+        </div>
+        <div class="schedule-status" id="nlStatus"></div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="card-head"><h2>Sparade nyhetsbrev</h2></div>
+        <div id="savedNewsletterList"></div>
       </div>
     </section>
 
@@ -3565,6 +3672,222 @@ Kansliet, Västerås SK</div>
     renderSavedProtocols();
   }
 
+  // ---- Nyhetsbrev ----
+  const SAVED_NEWSLETTERS = [];
+
+  function newsletterUpperFirst(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+  function sectionHeadingFor(fact) {
+    const lower = fact.toLowerCase();
+    if (/städ/.test(lower)) return '🧹 Städdag';
+    if (/sommartid|öppettid|stängt|semester/.test(lower)) return '🕒 Öppettider';
+    if (/anmäl|turnering|cup|match/.test(lower)) return '🏆 Anmälan & tävling';
+    if (/träning|schema/.test(lower)) return '⚽ Träning';
+    if (/bidrag|sponsor|ekonomi|avgift|faktura/.test(lower)) return '💰 Ekonomi';
+    if (/möte|årsmöte|styrelse/.test(lower)) return '📋 Möte';
+    return '📌 ' + newsletterUpperFirst(fact.split(' ').slice(0, 4).join(' '));
+  }
+
+  function generateNewsletter(raw, audience, titleOverride) {
+    const facts = raw.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
+    const items = facts.length ? facts : ['Inga stödord tillagda ännu'];
+
+    const rubrik = titleOverride || 'Nyhetsbrev från Västerås SK';
+    const ingress = `Hej ${audience || 'alla medlemmar'}! Här kommer lite nytt från kansliet — läs vidare för allt du behöver veta just nu.`;
+    const sections = items.map(fact => ({
+      heading: sectionHeadingFor(fact),
+      body: `${newsletterUpperFirst(fact)}. Hör av dig till kansliet om du har frågor kring detta.`,
+    }));
+    const avslutning = 'Tack för att du är en del av Västerås SK — hör av dig om du undrar över något.';
+    const cta = 'Kontakta kansliet';
+
+    return { rubrik, ingress, sections, avslutning, cta, generatedAt: new Date() };
+  }
+
+  function refineFormal(text) {
+    return text
+      .replace(/^Hej[^,!.]*[,!]?\s*/i, 'Bästa medlemmar, ')
+      .replace(/!/g, '.')
+      .replace(/\bkolla\b/gi, 'se')
+      .replace(/\bgrymt\b/gi, 'mycket bra');
+  }
+  function refineShorter(text) {
+    const sentences = text.split(/(?<=[.!?])\s+/).filter(Boolean);
+    if (sentences.length <= 1) return text;
+    return sentences.slice(0, Math.max(1, Math.ceil(sentences.length / 2))).join(' ');
+  }
+  function refineEnthusiastic(text) {
+    return text.replace(/\.(\s|$)/g, '! ').trim();
+  }
+  const REFINE_FN = { formal: refineFormal, short: refineShorter, enthusiastic: refineEnthusiastic };
+  const REFINE_LABEL = { formal: 'mer formell', short: 'kortare', enthusiastic: 'mer entusiastisk' };
+
+  function renderNewsletterResult(nl) {
+    const card = document.getElementById('nlResultCard');
+    card.style.display = 'block';
+    document.getElementById('nlGeneratedAt').textContent = `Genererat ${formatDateTimeSv(nl.generatedAt)}`;
+    document.getElementById('nlRubrik').value = nl.rubrik;
+    document.getElementById('nlIngress').value = nl.ingress;
+    document.getElementById('nlAvslutning').value = nl.avslutning;
+    document.getElementById('nlCta').value = nl.cta;
+    document.getElementById('nlSections').innerHTML = nl.sections.map((s, idx) => `
+      <div class="newsletter-section" data-idx="${idx}">
+        <div class="form-field">
+          <label>Sektionsrubrik</label>
+          <input type="text" class="nl-section-heading" value="${s.heading}">
+        </div>
+        <div class="form-field">
+          <label>Text</label>
+          <textarea class="nl-section-body">${s.body}</textarea>
+        </div>
+      </div>`).join('');
+  }
+
+  function readNewsletterFromForm() {
+    const sections = [...document.querySelectorAll('#nlSections .newsletter-section')].map(el => ({
+      heading: el.querySelector('.nl-section-heading').value,
+      body: el.querySelector('.nl-section-body').value,
+    }));
+    return {
+      rubrik: document.getElementById('nlRubrik').value,
+      ingress: document.getElementById('nlIngress').value,
+      sections,
+      avslutning: document.getElementById('nlAvslutning').value,
+      cta: document.getElementById('nlCta').value,
+    };
+  }
+
+  function newsletterToHTML(nl) {
+    const sectionsHtml = nl.sections.map(s => `
+      <tr><td style="padding:16px 24px 4px;"><h3 style="margin:0;font-family:Arial,sans-serif;color:#16223E;">${s.heading}</h3></td></tr>
+      <tr><td style="padding:4px 24px 16px;"><p style="margin:0;font-family:Arial,sans-serif;color:#333;line-height:1.5;">${s.body}</p></td></tr>`).join('');
+    return `<!DOCTYPE html>
+<html><body style="margin:0;background:#F7F1E3;font-family:Arial,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F7F1E3;padding:24px 0;">
+<tr><td align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#FFFFFF;border-radius:12px;overflow:hidden;">
+<tr><td style="background:#2453EB;padding:28px 24px;"><h1 style="margin:0;color:#FFFFFF;font-size:22px;font-family:Arial,sans-serif;">${nl.rubrik}</h1></td></tr>
+<tr><td style="padding:20px 24px 8px;"><p style="margin:0;font-family:Arial,sans-serif;color:#333;line-height:1.6;">${nl.ingress}</p></td></tr>
+${sectionsHtml}
+<tr><td style="padding:20px 24px 8px;"><p style="margin:0;font-family:Arial,sans-serif;color:#333;">${nl.avslutning}</p></td></tr>
+<tr><td style="padding:8px 24px 28px;"><a href="mailto:kansliet@vasterassk.se" style="display:inline-block;background:#2453EB;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-family:Arial,sans-serif;font-weight:bold;">${nl.cta}</a></td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+  }
+
+  function newsletterToMarkdown(nl) {
+    return [
+      `# ${nl.rubrik}`, '', nl.ingress, '',
+      ...nl.sections.map(s => `## ${s.heading}\n\n${s.body}`),
+      '', nl.avslutning, '', `**${nl.cta}**`,
+    ].join('\n');
+  }
+
+  function showNewsletterStatus(text) {
+    const el = document.getElementById('nlStatus');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.add('show');
+    clearTimeout(el._hideTimer);
+    el._hideTimer = setTimeout(() => el.classList.remove('show'), 5000);
+  }
+
+  function createNewsletterDraft() {
+    const nl = readNewsletterFromForm();
+    const bodyText = [nl.ingress, ...nl.sections.map(s => `${s.heading}\n${s.body}`), nl.avslutning].join('\n\n');
+    MAIL.unshift({
+      outgoing: true,
+      to: 'medlemmar@vasterassk.se',
+      subject: nl.rubrik,
+      priority: 'medel',
+      time: new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }),
+      draft: bodyText,
+    });
+    safe(renderMail);
+    safe(renderTodoSummary);
+    SAVED_NEWSLETTERS.unshift({ title: nl.rubrik, savedAt: new Date() });
+    renderSavedNewsletters();
+    showNewsletterStatus('E-postutkast skapat och nyhetsbrevet sparat — granska och skicka det i Mejl-fliken.');
+  }
+
+  function copyNewsletterHTML() {
+    const html = newsletterToHTML(readNewsletterFromForm());
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(html)
+        .then(() => showNewsletterStatus('HTML-koden är kopierad — klistra in i Mailchimp eller ditt e-postsystem.'))
+        .catch(() => showNewsletterStatus('Kunde inte kopiera automatiskt — markera och kopiera texten manuellt.'));
+    } else {
+      showNewsletterStatus('Kunde inte kopiera automatiskt — markera och kopiera texten manuellt.');
+    }
+  }
+
+  function downloadNewsletterText() {
+    const nl = readNewsletterFromForm();
+    const safeName = nl.rubrik.replace(/[^\wÅÄÖåäö -]/g, '') || 'nyhetsbrev';
+    downloadFile(`${safeName}.md`, newsletterToMarkdown(nl), 'text/markdown;charset=utf-8');
+    showNewsletterStatus('Nedladdning startad (.md).');
+  }
+
+  function printNewsletter() {
+    document.body.classList.add('printing-newsletter');
+    const cleanup = () => document.body.classList.remove('printing-newsletter');
+    window.addEventListener('afterprint', cleanup, { once: true });
+    window.print();
+    setTimeout(cleanup, 3000);
+  }
+
+  function renderSavedNewsletters() {
+    const el = document.getElementById('savedNewsletterList');
+    if (!el) return;
+    if (!SAVED_NEWSLETTERS.length) {
+      el.innerHTML = '<div class="day-empty">Inga sparade nyhetsbrev ännu.</div>';
+      return;
+    }
+    el.innerHTML = SAVED_NEWSLETTERS.map((n, idx) => `
+      <div class="saved-protocol-row reveal" ${revealDelay(idx)}>
+        <div>
+          <div class="team-name">${n.title}</div>
+          <div class="team-note">Sparat ${formatDateTimeSv(n.savedAt)}</div>
+        </div>
+      </div>`).join('');
+    observeReveals();
+  }
+
+  function initNewsletterPage() {
+    const generateBtn = document.getElementById('nlGenerateBtn');
+    if (!generateBtn) return;
+
+    generateBtn.addEventListener('click', () => {
+      const raw = document.getElementById('nlKeywords').value;
+      const audience = document.getElementById('nlAudience').value.trim();
+      const titleOverride = document.getElementById('nlTitleOverride').value.trim();
+      const nl = generateNewsletter(raw, audience, titleOverride);
+      renderNewsletterResult(nl);
+      document.getElementById('nlResultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    document.querySelectorAll('[data-refine]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const kind = btn.dataset.refine;
+        const fn = REFINE_FN[kind];
+        const ingressEl = document.getElementById('nlIngress');
+        const avslutningEl = document.getElementById('nlAvslutning');
+        const bodies = [...document.querySelectorAll('.nl-section-body')];
+        [ingressEl, avslutningEl, ...bodies].forEach(el => { el.value = fn(el.value); });
+        showNewsletterStatus(`Tonen är justerad: ${REFINE_LABEL[kind]}.`);
+      });
+    });
+
+    document.getElementById('nlCreateDraftBtn').addEventListener('click', createNewsletterDraft);
+    document.getElementById('nlCopyHtmlBtn').addEventListener('click', copyNewsletterHTML);
+    document.getElementById('nlDownloadTextBtn').addEventListener('click', downloadNewsletterText);
+    document.getElementById('nlPrintBtn').addEventListener('click', printNewsletter);
+
+    renderSavedNewsletters();
+  }
+
   function renderTimeSaved() {
     const hours = Math.round(totalHoursSaved());
     const krText = (Math.round(totalKrSaved() / 100) * 100).toLocaleString('sv-SE') + ' kr';
@@ -4131,6 +4454,7 @@ Kansliet, Västerås SK</div>
   safe(renderFacilities);
   safe(initSchedulePage);
   safe(initProtocolPage);
+  safe(initNewsletterPage);
   safe(initTabs);
   safe(initFilters);
   safe(initWeekNav);
