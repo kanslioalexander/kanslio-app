@@ -4187,9 +4187,13 @@ ${sectionsHtml}
     observeReveals();
   }
 
-  function renderFAQ(filterKey = 'alla') {
-    const cats = filterKey === 'alla' ? FAQ_CATEGORIES : FAQ_CATEGORIES.filter(c => c.key === filterKey);
-    document.getElementById('faqList').innerHTML = cats.map(cat => `
+  function renderFAQ(filterKey) {
+    const cat = FAQ_CATEGORIES.find(c => c.key === filterKey);
+    if (!cat) {
+      document.getElementById('faqList').innerHTML = `<div class="footnote" style="padding:4px 4px 0;">Välj en kategori ovan för att visa dess frågor.</div>`;
+      return;
+    }
+    document.getElementById('faqList').innerHTML = `
       <div class="faq-group">
         <div class="faq-group-title">${cat.name}</div>
         ${cat.questions.map((item, idx) => `
@@ -4200,28 +4204,31 @@ ${sectionsHtml}
             </button>
             <div class="faq-answer"><div class="faq-answer-inner">${item.a}</div></div>
           </div>`).join('')}
-      </div>`).join('');
+      </div>`;
     observeReveals();
   }
 
   function initFAQ() {
     const filters = document.getElementById('faqFilters');
-    filters.innerHTML = ['<button class="pill-filter active" data-cat="alla">Alla</button>']
-      .concat(FAQ_CATEGORIES.map(c => `<button class="pill-filter" data-cat="${c.key}">${c.name}</button>`))
-      .join('');
+    filters.innerHTML = FAQ_CATEGORIES.map(c => `<button class="pill-filter" data-cat="${c.key}">${c.name}</button>`).join('');
     filters.addEventListener('click', (e) => {
       const btn = e.target.closest('.pill-filter');
       if (!btn) return;
+      const wasActive = btn.classList.contains('active');
       filters.querySelectorAll('.pill-filter').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderFAQ(btn.dataset.cat);
+      if (wasActive) {
+        renderFAQ(null);
+      } else {
+        btn.classList.add('active');
+        renderFAQ(btn.dataset.cat);
+      }
     });
     document.getElementById('faqList').addEventListener('click', (e) => {
       const btn = e.target.closest('.faq-question');
       if (!btn) return;
       btn.closest('.faq-item').classList.toggle('open');
     });
-    renderFAQ();
+    renderFAQ(null);
   }
 
   function renderStatusBars() {
