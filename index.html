@@ -2206,6 +2206,20 @@
       </div>
     </div>
 
+    <div class="sub-step" id="subStepDowngradeOffer" hidden>
+      <div class="sub-done" style="padding-bottom:8px;">
+        <div class="sub-done-icon" style="background:var(--accent-soft); color:var(--accent-strong);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+        </div>
+        <div class="sub-done-title" id="downgradeTitle"></div>
+        <div class="sub-done-text" id="downgradeText"></div>
+      </div>
+      <div class="form-actions" style="justify-content:center; gap:10px; flex-wrap:wrap;">
+        <button class="btn-ghost" type="button" id="declineDowngradeBtn">Nej, fortsätt avsluta</button>
+        <button class="btn-primary" type="button" id="acceptDowngradeBtn"></button>
+      </div>
+    </div>
+
     <div class="sub-step" id="subStepEnterprise" hidden>
       <button class="sub-back" type="button" data-back>← Tillbaka</button>
       <p style="font-size:13.5px; color:var(--ink-secondary); line-height:1.55; margin-bottom:18px;">
@@ -2433,15 +2447,15 @@
   };
 
   const PLAN_OPTIONS = [
-    { key: 'bas', name: 'Kanslio Bas', price: '590 kr/mån', desc: 'För mindre kanslier: AI-skrivna mejl & fakturor, upp till 2 platser.' },
-    { key: 'pro', name: 'Kanslio Pro', price: '1 490 kr/mån', desc: 'Allt i Bas plus schemaläggning, statistik och rapporter, upp till 5 platser.' },
-    { key: 'enterprise', name: 'Kanslio Enterprise', price: 'Offert', desc: 'Skräddarsytt för större förbund och distrikt, obegränsat antal platser.' },
+    { key: 'bas', name: 'Kanslio Bas', priceValue: 590, price: '590 kr/mån', desc: 'För mindre kanslier: AI-skrivna mejl & fakturor, upp till 2 platser.' },
+    { key: 'pro', name: 'Kanslio Pro', priceValue: 1490, price: '1 490 kr/mån', desc: 'Allt i Bas plus schemaläggning, statistik och rapporter, upp till 5 platser.' },
+    { key: 'enterprise', name: 'Kanslio Enterprise', priceValue: null, price: 'Offert', desc: 'Skräddarsytt för större förbund och distrikt, obegränsat antal platser.' },
   ];
 
   const FEEDBACK_REASONS = [
     { key: 'dyrt', label: 'Det var för dyrt', followUp: {
       question: 'Vad skulle klubben tycka är en rimlig kostnad per månad?',
-      options: ['Under 500 kr/mån', '500–990 kr/mån', '990–1 490 kr/mån', 'Över 1 490 kr/mån'],
+      options: null,
     }},
     { key: 'anvande-inte', label: 'Vi använde det inte tillräckligt', followUp: {
       question: 'Vad var den största anledningen till att ni inte använde Kanslio mer?',
@@ -4450,7 +4464,7 @@ ${sectionsHtml}
     const overlay = document.getElementById('manageSubOverlay');
     if (!openBtn || !overlay) return;
 
-    const steps = ['Menu', 'Byt', 'Avsluta', 'Feedback', 'FeedbackFollowup', 'Enterprise', 'Done'].reduce((acc, name) => {
+    const steps = ['Menu', 'Byt', 'Avsluta', 'Feedback', 'FeedbackFollowup', 'DowngradeOffer', 'Enterprise', 'Done'].reduce((acc, name) => {
       acc[name] = document.getElementById(`subStep${name}`);
       return acc;
     }, {});
@@ -4485,11 +4499,34 @@ ${sectionsHtml}
         </button>`).join('');
     }
 
+    function currentPlanPriceValue() {
+      const p = PLAN_OPTIONS.find(p => p.name === SUBSCRIPTION.plan);
+      return p ? p.priceValue : null;
+    }
+
+    function cheaperPlan() {
+      const current = currentPlanPriceValue();
+      return PLAN_OPTIONS
+        .filter(p => p.priceValue != null && (current == null || p.priceValue < current))
+        .sort((a, b) => b.priceValue - a.priceValue)[0] || null;
+    }
+
+    function priceBandsBelow(current) {
+      const round10 = n => Math.max(50, Math.round(n / 10) * 10);
+      const p1 = round10(current * 0.3);
+      const p2 = round10(current * 0.55);
+      const p3 = round10(current * 0.8);
+      return [`Under ${p1} kr/mån`, `${p1}–${p2} kr/mån`, `${p2}–${p3} kr/mån`, `${p3}–${current - 10} kr/mån`];
+    }
+
     function renderFollowup(reason) {
       selectedFollowup = null;
       document.getElementById('submitFeedbackBtn').disabled = true;
       document.getElementById('followupQuestion').textContent = reason.followUp.question;
-      document.getElementById('followupOptions').innerHTML = reason.followUp.options.map(opt => `
+      const options = reason.key === 'dyrt'
+        ? priceBandsBelow(currentPlanPriceValue() || 1490)
+        : reason.followUp.options;
+      document.getElementById('followupOptions').innerHTML = options.map(opt => `
         <button class="feedback-option" type="button" data-followup="${opt}">
           <span class="feedback-option-dot"></span>
           <span>${opt}</span>
@@ -4567,9 +4604,32 @@ ${sectionsHtml}
       document.getElementById('submitFeedbackBtn').disabled = false;
     });
 
-    document.getElementById('submitFeedbackBtn').addEventListener('click', finishCancellation);
+    document.getElementById('submitFeedbackBtn').addEventListener('click', () => {
+      if (selectedReason === 'dyrt') {
+        const downgrade = cheaperPlan();
+        if (downgrade) {
+          document.getElementById('downgradeTitle').textContent = 'Vill ni hellre byta ner?';
+          document.getElementById('downgradeText').textContent = `${downgrade.name} kostar ${downgrade.price} och kan vara ett billigare alternativ istället för att avsluta helt.`;
+          document.getElementById('acceptDowngradeBtn').textContent = `Ja, byt till ${downgrade.name}`;
+          document.getElementById('acceptDowngradeBtn').dataset.plan = downgrade.key;
+          showStep('DowngradeOffer');
+          return;
+        }
+      }
+      finishCancellation();
+    });
     document.getElementById('skipFeedbackBtn').addEventListener('click', finishCancellation);
     document.getElementById('skipFollowupBtn').addEventListener('click', finishCancellation);
+
+    document.getElementById('acceptDowngradeBtn').addEventListener('click', (e) => {
+      const chosen = PLAN_OPTIONS.find(p => p.key === e.currentTarget.dataset.plan);
+      if (!chosen) return;
+      SUBSCRIPTION.plan = chosen.name;
+      SUBSCRIPTION.status = 'active';
+      renderSubscription();
+      finish('Ni har bytt medlemskap', `${chosen.name} är nu aktiv för kansliet. Ändringen börjar gälla från nästa faktureringsperiod.`);
+    });
+    document.getElementById('declineDowngradeBtn').addEventListener('click', finishCancellation);
 
     document.getElementById('sendEnterpriseBtn').addEventListener('click', () => {
       finish('Intresseanmälan skickad', 'Tack! Vårt Enterprise-team hör av sig till er lokala kontaktperson inom en arbetsdag.');
