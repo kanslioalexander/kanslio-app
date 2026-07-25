@@ -717,6 +717,46 @@
   :root[data-theme="dark"] .chart-tooltip { background: var(--surface); color: var(--ink); border: 1px solid var(--border-strong); }
   .chart-tooltip.show { opacity: 1; }
 
+  /* ---------- Mitt Kanslio ---------- */
+  .plan-hero {
+    display: flex; align-items: center; gap: 22px; padding: 26px 28px; flex-wrap: wrap;
+    background: linear-gradient(135deg, var(--accent-soft), var(--surface));
+    border: 1px solid var(--border); border-radius: var(--r-lg);
+  }
+  .plan-hero-icon {
+    width: 60px; height: 60px; border-radius: 18px; flex-shrink: 0;
+    background: var(--accent); color: var(--on-accent);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .plan-hero-text { flex: 1; min-width: 240px; }
+  .plan-hero-name {
+    font-family: ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+    font-weight: 800; font-size: 26px; color: var(--ink);
+    display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .plan-hero-sub { font-size: 14px; color: var(--ink-secondary); margin-top: 7px; }
+  .plan-hero-meta { font-size: 12.5px; color: var(--ink-muted); margin-top: 9px; }
+  .plan-seats { text-align: right; padding-left: 20px; border-left: 1px solid var(--border); }
+  .plan-seats-value { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--accent-strong); }
+  .plan-seats-label { font-size: 12px; color: var(--ink-muted); margin-top: 2px; white-space: nowrap; }
+
+  .plan-features {
+    flex-basis: 100%; list-style: none; margin-top: 4px; padding-top: 18px; border-top: 1px solid var(--border);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px;
+  }
+  .plan-features li { font-size: 13.5px; color: var(--ink-secondary); padding-left: 22px; position: relative; }
+  .plan-features li::before { content: '✓'; color: var(--good-ink); font-weight: 800; position: absolute; left: 0; top: 0; }
+  @media (max-width: 640px) { .plan-features { grid-template-columns: 1fr; } .plan-seats { text-align: left; border-left: none; padding-left: 0; border-top: 1px solid var(--border); padding-top: 14px; } }
+
+  .info-row { display: flex; gap: 12px; padding: 10px 4px; align-items: flex-start; }
+  .info-row-icon {
+    width: 32px; height: 32px; border-radius: var(--r-sm); flex-shrink: 0;
+    background: var(--accent-soft); color: var(--accent-strong);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .info-row-label { font-size: 12px; color: var(--ink-muted); font-weight: 600; }
+  .info-row-value { font-size: 13.5px; color: var(--ink); font-weight: 600; margin-top: 2px; }
+
   /* ---------- Chat ---------- */
   .chat-launcher {
     position: fixed; bottom: 26px; right: 26px; z-index: 50;
@@ -1189,6 +1229,10 @@
       <button class="nav-item" role="tab" aria-selected="false" data-view="rapporter">
         <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11M11 20V4M18 20v-6"/></svg></span>
         <span class="nav-label">Rapporter</span>
+      </button>
+      <button class="nav-item" role="tab" aria-selected="false" data-view="mitt-kanslio">
+        <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2"/><circle cx="10" cy="6" r="3.5"/><path d="M22 20v-2a4 4 0 00-3-3.87M15.5 2.63A3.5 3.5 0 0117.5 9.5"/></svg></span>
+        <span class="nav-label">Mitt Kanslio</span>
       </button>
     </nav>
 
@@ -1838,6 +1882,57 @@
         </div>
       </div>
     </section>
+
+    <!-- MITT KANSLIO -->
+    <section class="view" id="view-mitt-kanslio">
+      <div class="page-head">
+        <div>
+          <h1>Mitt Kanslio</h1>
+          <div class="sub">Vilka som har tillgång, er prenumeration och kontaktuppgifter till kansliet</div>
+        </div>
+      </div>
+
+      <div class="plan-hero reveal">
+        <div class="plan-hero-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6.5 7 1-5.2 5 1.3 7.2L12 18l-6.1 3.7L7.2 14.5 2 9.5l7-1z"/></svg>
+        </div>
+        <div class="plan-hero-text">
+          <div class="plan-hero-name">
+            Kanslio Pro
+            <span class="status-chip status-klar"><span class="dot"></span>Aktiv</span>
+          </div>
+          <div class="plan-hero-sub" id="planPriceLine"></div>
+          <div class="plan-hero-meta" id="planMetaLine"></div>
+        </div>
+        <div class="plan-seats">
+          <div class="plan-seats-value tabular" id="planSeats"></div>
+          <div class="plan-seats-label">platser använda</div>
+        </div>
+        <ul class="plan-features" id="planFeatures"></ul>
+      </div>
+
+      <div class="card card-pad reveal">
+        <div class="card-head"><h2>Vem har tillgång till Kanslio</h2></div>
+        <div class="table-wrap" style="margin-top:14px;">
+          <div class="table-head">
+            <div>Namn</div><div>E-post</div><div>Roll</div><div>Åtkomst</div><div>Senast aktiv</div>
+          </div>
+          <div id="teamAccessTable"></div>
+        </div>
+      </div>
+
+      <div class="report-grid">
+        <div class="card card-pad reveal">
+          <div class="card-head"><h2>Kontakta kansliet</h2></div>
+          <div id="officeContactList"></div>
+        </div>
+
+        <div class="card card-pad reveal">
+          <div class="card-head"><h2>Bra att veta</h2></div>
+          <div id="usefulInfoList"></div>
+        </div>
+      </div>
+    </section>
   </main>
   </div>
 </div>
@@ -2113,6 +2208,53 @@
     { label: 'v26', value: 8 }, { label: 'v27', value: 8.5 }, { label: 'v28', value: 9 },
     { label: 'v29', value: 8.5 }, { label: 'v30', value: 10 },
   ];
+
+  // ---- Mitt Kanslio: tillgång, prenumeration & kontakt ----
+  const ACCESS_LABEL = { admin: 'Administratör', handlaggare: 'Handläggare', las: 'Läsbehörighet' };
+  const ACCESS_STATUS = { admin: 'klar', handlaggare: 'pagar', las: 'ny' };
+
+  const TEAM_MEMBERS = [
+    { name: 'Erik Söderberg', email: 'erik.soderberg@vasterassk.se', role: 'Handläggare', access: 'admin', lastActive: 'Nu', initials: 'ES' },
+    { name: 'Maria Lindqvist', email: 'maria.lindqvist@vasterassk.se', role: 'Kanslichef', access: 'admin', lastActive: 'Idag 09:12', initials: 'ML' },
+    { name: 'Johan Bergström', email: 'johan.bergstrom@vasterassk.se', role: 'Ekonomiansvarig', access: 'handlaggare', lastActive: 'Igår 16:40', initials: 'JB' },
+    { name: 'Sara Öhman', email: 'sara.ohman@vasterassk.se', role: 'Ungdomsansvarig', access: 'las', lastActive: '3 dagar sedan', initials: 'SÖ' },
+  ];
+
+  const SUBSCRIPTION = {
+    price: '1 490 kr', cycle: 'per månad · faktureras årsvis till kansliet',
+    renewal: '1 september 2026', seatsUsed: 4, seatsTotal: 5,
+    features: [
+      'Obegränsat med AI-skrivna mejlutkast & fakturor',
+      'Schemaläggning & kalender för alla lag',
+      'Statistik & rapporter',
+      'Prioriterad support',
+    ],
+  };
+
+  const OFFICE_CONTACT = [
+    { icon: 'mail', label: 'E-post', value: 'kansli@vasterassk.se' },
+    { icon: 'phone', label: 'Telefon', value: '021-123 45 67' },
+    { icon: 'pin', label: 'Adress', value: 'Idrottsvägen 4, 722 12 Västerås' },
+    { icon: 'clock', label: 'Öppettider', value: 'Mån–fre 09:00–16:00' },
+  ];
+
+  const USEFUL_INFO = [
+    { icon: 'billing', label: 'Faktureringsansvarig', value: 'Maria Lindqvist · ekonomi@vasterassk.se' },
+    { icon: 'support', label: 'Support', value: 'support@kanslio.se · svar inom 4 timmar' },
+    { icon: 'shield', label: 'Datalagring', value: 'All data lagras inom EU och hanteras GDPR-säkert' },
+    { icon: 'contract', label: 'Avtalsperiod', value: '1 sep 2025 – 31 aug 2026 · förnyas automatiskt' },
+  ];
+
+  const INFO_ICONS = {
+    mail: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 7l9 6 9-6"/></svg>',
+    phone: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.3 1.9.6 2.7a2 2 0 01-.5 2.1L8 9.7a16 16 0 006 6l1.2-1.2a2 2 0 012.1-.5c.9.3 1.8.5 2.7.6a2 2 0 011.7 2z"/></svg>',
+    pin: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1116 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+    clock: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
+    billing: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6"/></svg>',
+    support: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 2-3 4M12 17h.01"/></svg>',
+    shield: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V6l7-3z"/></svg>',
+    contract: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>',
+  };
 
   const KR_PER_HOUR = 320;
 
@@ -3955,6 +4097,37 @@ ${sectionsHtml}
     observeReveals();
   }
 
+  function renderTeamAccess() {
+    document.getElementById('teamAccessTable').innerHTML = TEAM_MEMBERS.map((m, idx) => `
+      <div class="full-row reveal" ${revealDelay(idx)}>
+        <div class="assignee"><span class="mini-avatar">${m.initials}</span>${m.name}</div>
+        <div class="case-client">${m.email}</div>
+        <div class="case-deadline">${m.role}</div>
+        <div><span class="status-chip status-${ACCESS_STATUS[m.access]}"><span class="dot"></span>${ACCESS_LABEL[m.access]}</span></div>
+        <div class="case-deadline tabular">${m.lastActive}</div>
+      </div>`).join('');
+    observeReveals();
+  }
+
+  function renderSubscription() {
+    document.getElementById('planPriceLine').textContent = `${SUBSCRIPTION.price} ${SUBSCRIPTION.cycle}`;
+    document.getElementById('planMetaLine').textContent = `Förnyas ${SUBSCRIPTION.renewal}`;
+    document.getElementById('planSeats').innerHTML = `${SUBSCRIPTION.seatsUsed}<span class="unit"> av ${SUBSCRIPTION.seatsTotal}</span>`;
+    document.getElementById('planFeatures').innerHTML = SUBSCRIPTION.features.map(f => `<li>${f}</li>`).join('');
+  }
+
+  function renderInfoList(elId, items) {
+    document.getElementById(elId).innerHTML = items.map((it, idx) => `
+      <div class="info-row reveal" ${revealDelay(idx)}>
+        <div class="info-row-icon">${INFO_ICONS[it.icon]}</div>
+        <div>
+          <div class="info-row-label">${it.label}</div>
+          <div class="info-row-value">${it.value}</div>
+        </div>
+      </div>`).join('');
+    observeReveals();
+  }
+
   function renderStatusBars() {
     const max = Math.max(...STATUS_BREAKDOWN.map(s => s.count));
     document.getElementById('statusBars').innerHTML = STATUS_BREAKDOWN.map((s, idx) => `
@@ -4455,6 +4628,10 @@ ${sectionsHtml}
   safe(initSchedulePage);
   safe(initProtocolPage);
   safe(initNewsletterPage);
+  safe(renderTeamAccess);
+  safe(renderSubscription);
+  safe(() => renderInfoList('officeContactList', OFFICE_CONTACT));
+  safe(() => renderInfoList('usefulInfoList', USEFUL_INFO));
   safe(initTabs);
   safe(initFilters);
   safe(initWeekNav);
