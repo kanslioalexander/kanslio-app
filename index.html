@@ -774,6 +774,50 @@
   .faq-item.open .faq-answer { max-height: 480px; }
   .faq-answer-inner { padding: 0 16px 16px; font-size: 13.5px; color: var(--ink-secondary); line-height: 1.55; }
 
+  .plan-actions { flex-basis: 100%; display: flex; justify-content: flex-end; }
+
+  /* ---------- Hantera prenumeration modal ---------- */
+  .sub-option {
+    display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+    border: 1px solid var(--border); border-radius: var(--r-md); margin-bottom: 10px;
+    cursor: pointer; background: var(--surface); transition: all .15s ease; text-align: left; width: 100%;
+  }
+  .sub-option:hover { border-color: var(--accent-soft-strong); background: var(--bg-soft); }
+  .sub-option-icon {
+    width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+    background: var(--accent-soft); color: var(--accent-strong);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sub-option.danger .sub-option-icon { background: var(--warn-soft); color: var(--warn-ink); }
+  .sub-option-body { flex: 1; }
+  .sub-option-title { font-size: 14.5px; font-weight: 700; color: var(--ink); }
+  .sub-option-desc { font-size: 12.5px; color: var(--ink-secondary); margin-top: 2px; }
+  .sub-option .chev { flex-shrink: 0; color: var(--ink-muted); }
+
+  .sub-back {
+    display: inline-flex; align-items: center; gap: 6px; border: none; background: none;
+    color: var(--ink-secondary); font-size: 13px; font-weight: 600; cursor: pointer; padding: 0 0 16px; font-family: inherit;
+  }
+  .sub-back:hover { color: var(--accent-strong); }
+
+  .plan-option {
+    border: 1px solid var(--border); border-radius: var(--r-md); padding: 16px; margin-bottom: 12px;
+  }
+  .plan-option.current { border-color: var(--accent-soft-strong); background: var(--accent-soft); }
+  .plan-option-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .plan-option-name { font-size: 15px; font-weight: 800; color: var(--ink); }
+  .plan-option-price { font-size: 13.5px; font-weight: 700; color: var(--accent-strong); }
+  .plan-option-desc { font-size: 13px; color: var(--ink-secondary); margin: 6px 0 12px; }
+
+  .sub-done { text-align: center; padding: 12px 8px 24px; }
+  .sub-done-icon {
+    width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 16px;
+    background: var(--good-soft); color: var(--good-ink);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sub-done-title { font-size: 16px; font-weight: 800; color: var(--ink); }
+  .sub-done-text { font-size: 13.5px; color: var(--ink-secondary); margin-top: 8px; line-height: 1.5; }
+
   /* ---------- Chat ---------- */
   .chat-launcher {
     position: fixed; bottom: 26px; right: 26px; z-index: 50;
@@ -1915,8 +1959,8 @@
         </div>
         <div class="plan-hero-text">
           <div class="plan-hero-name">
-            Kanslio Pro
-            <span class="status-chip status-klar"><span class="dot"></span>Aktiv</span>
+            <span id="planNameText">Kanslio Pro</span>
+            <span class="status-chip status-klar" id="planStatusChip"><span class="dot"></span>Aktiv</span>
           </div>
           <div class="plan-hero-sub" id="planPriceLine"></div>
           <div class="plan-hero-meta" id="planMetaLine"></div>
@@ -1926,6 +1970,9 @@
           <div class="plan-seats-label">platser använda</div>
         </div>
         <ul class="plan-features" id="planFeatures"></ul>
+        <div class="plan-actions">
+          <button class="btn-ghost" id="manageSubBtn" type="button">Hantera prenumeration</button>
+        </div>
       </div>
 
       <div class="card card-pad reveal">
@@ -2053,6 +2100,96 @@
 <!-- Nytt mejl: förhandsgranskning -->
 <div class="modal-overlay" id="mailPreviewOverlay">
   <div class="email-doc" id="mailDoc"></div>
+</div>
+
+<!-- Hantera prenumeration -->
+<div class="modal-overlay" id="manageSubOverlay">
+  <div class="modal-panel">
+    <div class="modal-head">
+      <div>
+        <h2>Hantera prenumeration</h2>
+        <p id="manageSubIntro"></p>
+      </div>
+      <button class="modal-close" id="manageSubClose" aria-label="Stäng">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="sub-step" id="subStepMenu">
+      <button class="sub-option" type="button" data-step="byt">
+        <div class="sub-option-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+        </div>
+        <div class="sub-option-body">
+          <div class="sub-option-title">Byt medlemskap</div>
+          <div class="sub-option-desc">Se våra andra planer och byt när du vill.</div>
+        </div>
+        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+
+      <button class="sub-option" type="button" data-step="enterprise">
+        <div class="sub-option-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l6-4 6 4v13"/><path d="M15 21V11l6-3v13"/><path d="M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/></svg>
+        </div>
+        <div class="sub-option-body">
+          <div class="sub-option-title">Kontakta oss för Enterprise</div>
+          <div class="sub-option-desc">Skräddarsytt för större förbund och distrikt.</div>
+        </div>
+        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+
+      <button class="sub-option danger" type="button" data-step="avsluta">
+        <div class="sub-option-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+        </div>
+        <div class="sub-option-body">
+          <div class="sub-option-title">Avsluta prenumeration</div>
+          <div class="sub-option-desc">Ni behåller åtkomst ut nuvarande avtalsperiod.</div>
+        </div>
+        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+
+    <div class="sub-step" id="subStepByt" hidden>
+      <button class="sub-back" type="button" data-back>← Tillbaka</button>
+      <div id="planOptionsList"></div>
+    </div>
+
+    <div class="sub-step" id="subStepAvsluta" hidden>
+      <button class="sub-back" type="button" data-back>← Tillbaka</button>
+      <p style="font-size:13.5px; color:var(--ink-secondary); line-height:1.55; margin-bottom:18px;">
+        Om ni avslutar prenumerationen behåller kansliet full åtkomst ut nuvarande avtalsperiod. Därefter stängs kontona av och all data raderas enligt vår lagringspolicy.
+      </p>
+      <div class="form-actions">
+        <button class="btn-ghost" type="button" data-back>Avbryt</button>
+        <button class="btn-primary" id="confirmCancelBtn" type="button">Bekräfta uppsägning</button>
+      </div>
+    </div>
+
+    <div class="sub-step" id="subStepEnterprise" hidden>
+      <button class="sub-back" type="button" data-back>← Tillbaka</button>
+      <p style="font-size:13.5px; color:var(--ink-secondary); line-height:1.55; margin-bottom:18px;">
+        Kanslio Enterprise passar förbund och distrikt med flera föreningar: obegränsat antal platser, samlad fakturering och en dedikerad kontaktperson. Skicka en intresseanmälan så hör vi av oss inom en arbetsdag.
+      </p>
+      <div class="form-actions">
+        <button class="btn-ghost" type="button" data-back>Avbryt</button>
+        <button class="btn-primary" id="sendEnterpriseBtn" type="button">Skicka intresseanmälan</button>
+      </div>
+    </div>
+
+    <div class="sub-step" id="subStepDone" hidden>
+      <div class="sub-done">
+        <div class="sub-done-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <div class="sub-done-title" id="subDoneTitle"></div>
+        <div class="sub-done-text" id="subDoneText"></div>
+      </div>
+      <div class="form-actions" style="justify-content:center;">
+        <button class="btn-primary" type="button" data-close>Stäng</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Chat -->
@@ -2244,6 +2381,7 @@
   ];
 
   const SUBSCRIPTION = {
+    plan: 'Kanslio Pro', status: 'active',
     price: '1 490 kr', cycle: 'per månad · faktureras årsvis till kansliet',
     renewal: '1 september 2026', seatsUsed: 4, seatsTotal: 5,
     features: [
@@ -2253,6 +2391,12 @@
       'Prioriterad support',
     ],
   };
+
+  const PLAN_OPTIONS = [
+    { key: 'bas', name: 'Kanslio Bas', price: '590 kr/mån', desc: 'För mindre kanslier: AI-skrivna mejl & fakturor, upp till 2 platser.' },
+    { key: 'pro', name: 'Kanslio Pro', price: '1 490 kr/mån', desc: 'Allt i Bas plus schemaläggning, statistik och rapporter, upp till 5 platser.' },
+    { key: 'enterprise', name: 'Kanslio Enterprise', price: 'Offert', desc: 'Skräddarsytt för större förbund och distrikt, obegränsat antal platser.' },
+  ];
 
   const OFFICE_CONTACT = [
     { icon: 'mail', label: 'E-post', value: 'info@kanslio.com' },
@@ -4169,10 +4313,17 @@ ${sectionsHtml}
   }
 
   function renderSubscription() {
+    document.getElementById('planNameText').textContent = SUBSCRIPTION.plan;
     document.getElementById('planPriceLine').textContent = `${SUBSCRIPTION.price} ${SUBSCRIPTION.cycle}`;
-    document.getElementById('planMetaLine').textContent = `Förnyas ${SUBSCRIPTION.renewal}`;
+    document.getElementById('planMetaLine').textContent = SUBSCRIPTION.status === 'cancelled'
+      ? `Avslutas ${SUBSCRIPTION.renewal} · ingen ny fakturering därefter`
+      : `Förnyas ${SUBSCRIPTION.renewal}`;
     document.getElementById('planSeats').innerHTML = `${SUBSCRIPTION.seatsUsed}<span class="unit"> av ${SUBSCRIPTION.seatsTotal}</span>`;
     document.getElementById('planFeatures').innerHTML = SUBSCRIPTION.features.map(f => `<li>${f}</li>`).join('');
+    const chip = document.getElementById('planStatusChip');
+    chip.className = `status-chip status-${SUBSCRIPTION.status === 'cancelled' ? 'vantar' : 'klar'}`;
+    chip.innerHTML = `<span class="dot"></span>${SUBSCRIPTION.status === 'cancelled' ? 'Avslutas' : 'Aktiv'}`;
+    document.getElementById('manageSubIntro').textContent = `${SUBSCRIPTION.plan} · ${SUBSCRIPTION.price} ${SUBSCRIPTION.cycle}`;
   }
 
   function renderInfoList(elId, items) {
@@ -4229,6 +4380,90 @@ ${sectionsHtml}
       btn.closest('.faq-item').classList.toggle('open');
     });
     renderFAQ(null);
+  }
+
+  function initManageSubscription() {
+    const openBtn = document.getElementById('manageSubBtn');
+    const overlay = document.getElementById('manageSubOverlay');
+    if (!openBtn || !overlay) return;
+
+    const steps = ['Menu', 'Byt', 'Avsluta', 'Enterprise', 'Done'].reduce((acc, name) => {
+      acc[name] = document.getElementById(`subStep${name}`);
+      return acc;
+    }, {});
+
+    function showStep(name) {
+      Object.values(steps).forEach(el => { el.hidden = true; });
+      steps[name].hidden = false;
+    }
+
+    function renderPlanOptions() {
+      document.getElementById('planOptionsList').innerHTML = PLAN_OPTIONS.map(p => `
+        <div class="plan-option${p.name === SUBSCRIPTION.plan ? ' current' : ''}">
+          <div class="plan-option-head">
+            <div class="plan-option-name">${p.name}</div>
+            <div class="plan-option-price">${p.price}</div>
+          </div>
+          <div class="plan-option-desc">${p.desc}</div>
+          ${p.name === SUBSCRIPTION.plan
+            ? `<span class="status-chip status-klar"><span class="dot"></span>Nuvarande plan</span>`
+            : `<button class="btn-ghost" type="button" data-plan="${p.key}">Välj ${p.name}</button>`}
+        </div>`).join('');
+    }
+
+    function openModal() {
+      renderPlanOptions();
+      showStep('Menu');
+      overlay.classList.add('open');
+    }
+    function closeModal() { overlay.classList.remove('open'); }
+
+    function finish(title, text) {
+      document.getElementById('subDoneTitle').textContent = title;
+      document.getElementById('subDoneText').textContent = text;
+      showStep('Done');
+    }
+
+    openBtn.addEventListener('click', openModal);
+    document.getElementById('manageSubClose').addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+    steps.Menu.addEventListener('click', (e) => {
+      const btn = e.target.closest('.sub-option');
+      if (!btn) return;
+      const step = btn.dataset.step;
+      showStep(step === 'byt' ? 'Byt' : step === 'avsluta' ? 'Avsluta' : 'Enterprise');
+    });
+
+    overlay.querySelectorAll('[data-back]').forEach(btn => {
+      btn.addEventListener('click', () => showStep('Menu'));
+    });
+
+    document.getElementById('planOptionsList').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-plan]');
+      if (!btn) return;
+      const chosen = PLAN_OPTIONS.find(p => p.key === btn.dataset.plan);
+      if (!chosen) return;
+      SUBSCRIPTION.plan = chosen.name;
+      SUBSCRIPTION.status = 'active';
+      renderSubscription();
+      finish('Ni har bytt medlemskap', `${chosen.name} är nu aktiv för kansliet. Ändringen börjar gälla från nästa faktureringsperiod.`);
+    });
+
+    document.getElementById('confirmCancelBtn').addEventListener('click', () => {
+      SUBSCRIPTION.status = 'cancelled';
+      renderSubscription();
+      finish('Uppsägningen är mottagen', `Kansliet behåller åtkomst ut avtalsperioden (${SUBSCRIPTION.renewal}). Därefter avslutas prenumerationen automatiskt.`);
+    });
+
+    document.getElementById('sendEnterpriseBtn').addEventListener('click', () => {
+      finish('Intresseanmälan skickad', 'Tack! Vårt Enterprise-team hör av sig till er lokala kontaktperson inom en arbetsdag.');
+    });
+
+    overlay.querySelectorAll('[data-close]').forEach(btn => {
+      btn.addEventListener('click', closeModal);
+    });
   }
 
   function renderStatusBars() {
@@ -4736,6 +4971,7 @@ ${sectionsHtml}
   safe(() => renderInfoList('officeContactList', OFFICE_CONTACT));
   safe(() => renderInfoList('usefulInfoList', USEFUL_INFO));
   safe(initFAQ);
+  safe(initManageSubscription);
   safe(initTabs);
   safe(initFilters);
   safe(initWeekNav);
