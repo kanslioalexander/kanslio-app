@@ -626,6 +626,47 @@
     font-size: 12.5px; font-weight: 700;
   }
 
+  /* ---------- Protokoll & Underlag ---------- */
+  #protocolInput { min-height: 130px; }
+  .protocol-file-note { font-size: 12px; color: var(--ink-secondary); margin-top: 6px; }
+  .protocol-agenda-total { font-size: 13.5px; color: var(--ink-secondary); margin-bottom: 10px; }
+  .protocol-agenda-row {
+    display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .protocol-agenda-row:last-child { border-bottom: none; }
+  .protocol-agenda-nr {
+    width: 26px; height: 26px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-strong);
+    font-weight: 800; font-size: 12.5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .protocol-agenda-main { flex: 1; }
+  .protocol-agenda-title { font-weight: 700; font-size: 14px; }
+  .protocol-agenda-meta { font-size: 12.5px; color: var(--ink-secondary); margin-top: 3px; }
+  .protocol-agenda-time { font-size: 12.5px; color: var(--ink-muted); white-space: nowrap; flex-shrink: 0; }
+
+  .protocol-para { padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .protocol-para:last-child { border-bottom: none; }
+  .protocol-para-nr { font-weight: 800; color: var(--accent-strong); margin-right: 6px; }
+  .protocol-para-decision {
+    margin-top: 8px; padding: 8px 12px; background: var(--good-soft); color: var(--good-ink);
+    border-radius: var(--r-sm); font-size: 13px; font-weight: 600;
+  }
+  .protocol-para-assignee { font-size: 12.5px; color: var(--ink-muted); margin-top: 5px; }
+
+  .protocol-email-suggestion {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .protocol-email-suggestion:last-child { border-bottom: none; }
+  .protocol-email-suggestion-text { font-size: 13.5px; flex: 1; }
+  .protocol-email-suggestion-text b { display: block; font-size: 13px; margin-bottom: 2px; }
+  .protocol-email-suggestion button { flex-shrink: 0; }
+
+  .saved-protocol-row {
+    display: flex; justify-content: space-between; align-items: center; padding: 12px 10px;
+    border-radius: var(--r-md);
+  }
+  .saved-protocol-row:hover { background: var(--bg-soft); }
+
   /* ---------- Kalender ---------- */
   .week-nav { display: flex; align-items: center; gap: 14px; }
   .week-label { font-weight: 700; font-size: 15px; min-width: 190px; text-align: center; }
@@ -1063,6 +1104,13 @@
     body.printing-schedule .schedule-actions,
     body.printing-schedule .schedule-status,
     body.printing-schedule #scheduleTeamFilter { display: none !important; }
+    body.printing-protocol #protocolResultCard,
+    body.printing-protocol #protocolResultCard * { visibility: visible; }
+    body.printing-protocol #protocolResultCard {
+      position: fixed; inset: 0; margin: 0; padding: 24px; box-shadow: none; border: none;
+    }
+    body.printing-protocol .schedule-actions,
+    body.printing-protocol .schedule-status { display: none !important; }
   }
   @media (max-width: 640px) {
     .form-row, .invoice-doc-parties, .invoice-doc-pay { grid-template-columns: 1fr; }
@@ -1108,6 +1156,10 @@
       <button class="nav-item" role="tab" aria-selected="false" data-view="arenden">
         <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg></span>
         <span class="nav-label">Ärenden</span>
+      </button>
+      <button class="nav-item" role="tab" aria-selected="false" data-view="protokoll">
+        <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8a2 2 0 012 2v14a2 2 0 01-2 2H8a2 2 0 01-2-2V5a2 2 0 012-2z"/><path d="M9 8h6M9 12h6M9 16h3"/><path d="M8 3v3h8V3"/></svg></span>
+        <span class="nav-label">Protokoll</span>
       </button>
       <button class="nav-item" role="tab" aria-selected="false" data-view="statistik">
         <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>
@@ -1542,6 +1594,80 @@
             <div class="settings-categories" id="categoryTags"></div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- PROTOKOLL & UNDERLAG -->
+    <section class="view" id="view-protokoll">
+      <div class="page-head">
+        <div>
+          <h1>Protokoll &amp; Underlag</h1>
+          <div class="sub">Från anteckningar till justerat protokoll — och uppföljning via mejl</div>
+        </div>
+      </div>
+
+      <div class="mail-hero reveal">
+        <div class="mail-hero-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8a2 2 0 012 2v14a2 2 0 01-2 2H8a2 2 0 01-2-2V5a2 2 0 012-2z"/><path d="M9 8h6M9 12h6M9 16h3"/><path d="M8 3v3h8V3"/></svg>
+        </div>
+        <div class="mail-hero-text">
+          <h2>Kanslio strukturerar dagordningar och protokoll åt dig</h2>
+          <p>Klistra in punkter eller anteckningar — Kanslio numrerar, sammanfattar beslut och föreslår uppföljningsmejl.</p>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="pill-filters" id="protocolModeFilters">
+          <button class="pill-filter active" data-mode="dagordning">Dagordning inför möte</button>
+          <button class="pill-filter" data-mode="protokoll">Mötesprotokoll efter möte</button>
+        </div>
+
+        <div class="form-field" style="margin-top:18px;">
+          <label for="protocolInput" id="protocolInputLabel">Klistra in punkter inför mötet (en per rad)</label>
+          <textarea id="protocolInput" placeholder="T.ex.&#10;Genomgång av budget hösten&#10;Besluta om nytt sponsoravtal med Byggmax&#10;Bevilja bidrag till P14:s cupresa"></textarea>
+        </div>
+
+        <div class="form-field">
+          <label for="protocolFileInput">Eller ladda upp en textfil (.txt)</label>
+          <input type="file" id="protocolFileInput" accept=".txt,.md">
+          <div class="protocol-file-note" id="protocolFileNote"></div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="protocolMeetingTitle">Möte</label>
+            <input type="text" id="protocolMeetingTitle" value="Styrelsemöte">
+          </div>
+          <div class="form-field" id="protocolAttendeesField" style="display:none;">
+            <label for="protocolAttendees">Närvarande (kommaseparerat)</label>
+            <input type="text" id="protocolAttendees" value="Erik Söderberg, Maria Lindqvist, Johan Ahlgren">
+          </div>
+        </div>
+
+        <button class="btn-primary" id="protocolGenerateBtn" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3z"/><path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14z"/></svg>
+          Generera med AI
+        </button>
+      </div>
+
+      <div class="card card-pad" id="protocolResultCard" style="display:none;">
+        <div class="card-head">
+          <h2 id="protocolResultTitle">Resultat</h2>
+          <div class="schedule-generated-at" id="protocolGeneratedAt"></div>
+        </div>
+        <div id="protocolResultBody"></div>
+
+        <div class="schedule-actions">
+          <button class="btn-ghost" id="protocolPrintBtn" type="button">Skriv ut / Spara som PDF</button>
+          <button class="btn-ghost" id="protocolDownloadBtn" type="button">Ladda ner (.doc)</button>
+          <button class="btn-primary" id="protocolSaveBtn" type="button">Spara i systemet</button>
+        </div>
+        <div class="schedule-status" id="protocolStatus"></div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="card-head"><h2>Sparade protokoll</h2></div>
+        <div id="savedProtocolList"></div>
       </div>
     </section>
 
@@ -2117,7 +2243,7 @@
       <div class="mail-row reveal" ${revealDelay(i)} data-idx="${i}">
         <div class="mail-row-top">
           <div>
-            <div class="mail-from">${m.sent ? `Till: ${m.to}` : m.from}</div>
+            <div class="mail-from">${m.sent || m.outgoing ? `Till: ${m.to}` : m.from}</div>
             <div class="mail-subject">${m.subject}</div>
           </div>
           ${m.sent
@@ -2170,7 +2296,7 @@
   function sendMailDraft(idx) {
     const m = MAIL[idx];
     if (!m || m.sent) return;
-    m.to = m.from;
+    if (!m.outgoing) m.to = m.from;
     m.body = m.draft;
     m.sent = true;
     m.time = new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
@@ -2688,6 +2814,18 @@
     return { amne: subject, meddelande };
   }
 
+  // ---- Kontaktkatalog för att gissa e-postadress utifrån ett namn ----
+  const CONTACT_DIRECTORY = {
+    erik: 'erik.soderberg@vasterassk.se',
+    tommy: 'tommy@vasterassk.se',
+    maria: 'maria.lindqvist@vasterassk.se',
+    johan: 'johan.ahlgren@vasterassk.se',
+  };
+  function guessEmailForName(name) {
+    const key = name.toLowerCase();
+    return CONTACT_DIRECTORY[key] || `${key.replace(/\s+/g, '.')}@vasterassk.se`;
+  }
+
   function formatDateTimeSv(d) {
     return d.toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' }) +
       ' kl. ' + d.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
@@ -3201,6 +3339,231 @@ Kansliet, Västerås SK</div>
     renderScheduleResult();
   }
 
+  // ---- Protokoll & Underlag ----
+  const SAVED_PROTOCOLS = [];
+  let currentProtocolResult = null;
+  let protocolMode = 'dagordning';
+
+  function splitProtocolLines(raw) {
+    return raw.split('\n').map(l => l.replace(/^[-•*]\s*/, '').trim()).filter(Boolean);
+  }
+  function isDecisionLine(line) {
+    return /besluta|godkänn|välja|fastställ|anta\b|bevilja|avslå/i.test(line);
+  }
+  function guessAssignee(line) {
+    const m = line.match(/\b(Erik|Maria|Johan|Tommy)\b/);
+    return m ? m[1] : 'Kansliet';
+  }
+  function protocolLowerFirst(s) { return s ? s.charAt(0).toLowerCase() + s.slice(1) : s; }
+
+  function generateAgendaResult(lines, meetingTitle) {
+    const items = lines.length ? lines : ['Övriga frågor'];
+    const perItem = items.length <= 4 ? 15 : items.length <= 8 ? 10 : 5;
+    let total = 15; // mötets öppnande + avslutande
+    const rows = items.map((line, i) => {
+      const decision = isDecisionLine(line);
+      const minutes = decision ? perItem + 5 : perItem;
+      total += minutes;
+      return { nr: i + 1, title: line, decision, minutes };
+    });
+    return { kind: 'dagordning', meetingTitle, rows, totalMinutes: total, generatedAt: new Date() };
+  }
+
+  function generateProtocolResult(lines, meetingTitle, attendeesRaw) {
+    const items = lines.length ? lines : ['Inga anteckningar tillagda'];
+    const attendees = attendeesRaw.split(',').map(s => s.trim()).filter(Boolean);
+    const paragraphs = items.map((line, i) => {
+      const decision = isDecisionLine(line);
+      return {
+        nr: i + 1,
+        text: line,
+        beslut: decision ? `Mötet beslutade att ${protocolLowerFirst(line)}.` : null,
+        uppdragstagare: decision ? guessAssignee(line) : null,
+      };
+    });
+    return { kind: 'protokoll', meetingTitle, attendees, paragraphs, generatedAt: new Date() };
+  }
+
+  function createDraftFromProtocol(para) {
+    const recipientLabel = para.uppdragstagare === 'Kansliet' ? 'Berörd part' : para.uppdragstagare;
+    const generated = generateEmailFromKeywords(para.beslut.replace(/^Mötet beslutade att\s*/i, ''));
+    MAIL.unshift({
+      outgoing: true,
+      to: guessEmailForName(recipientLabel),
+      subject: generated.amne,
+      priority: 'medel',
+      time: new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }),
+      draft: generated.meddelande,
+    });
+    safe(renderMail);
+    safe(renderTodoSummary);
+  }
+
+  function renderProtocolResult() {
+    const card = document.getElementById('protocolResultCard');
+    const body = document.getElementById('protocolResultBody');
+    const titleEl = document.getElementById('protocolResultTitle');
+    const genAt = document.getElementById('protocolGeneratedAt');
+    if (!card || !currentProtocolResult) { if (card) card.style.display = 'none'; return; }
+    card.style.display = 'block';
+    genAt.textContent = `Genererat ${formatDateTimeSv(currentProtocolResult.generatedAt)}`;
+
+    if (currentProtocolResult.kind === 'dagordning') {
+      titleEl.textContent = `Dagordning — ${currentProtocolResult.meetingTitle}`;
+      body.innerHTML = `
+        <div class="protocol-agenda-total">Beräknad mötestid: <b>${currentProtocolResult.totalMinutes} minuter</b></div>
+        ${currentProtocolResult.rows.map(r => `
+          <div class="protocol-agenda-row">
+            <div class="protocol-agenda-nr">${r.nr}</div>
+            <div class="protocol-agenda-main">
+              <div class="protocol-agenda-title">${r.title}</div>
+              <div class="protocol-agenda-meta">${r.decision ? 'Beslutspunkt — beslutsunderlag bifogas, mötet fattar beslut.' : 'Informationspunkt — föredras, ingen åtgärd krävs.'}</div>
+            </div>
+            <div class="protocol-agenda-time tabular">${r.minutes} min</div>
+          </div>`).join('')}`;
+      return;
+    }
+
+    titleEl.textContent = `Protokoll — ${currentProtocolResult.meetingTitle}`;
+    const decisionParas = currentProtocolResult.paragraphs.filter(p => p.beslut);
+    body.innerHTML = `
+      <div class="protocol-para"><b>Närvarande:</b> ${currentProtocolResult.attendees.join(', ') || 'Ej angivet'}</div>
+      ${currentProtocolResult.paragraphs.map(p => `
+        <div class="protocol-para">
+          <span class="protocol-para-nr">§ ${p.nr}</span>${p.text}
+          ${p.beslut ? `<div class="protocol-para-decision">${p.beslut}</div><div class="protocol-para-assignee">Uppdragstagare: ${p.uppdragstagare}</div>` : ''}
+        </div>`).join('')}
+      <div class="protocol-para"><span class="protocol-para-nr">§ ${currentProtocolResult.paragraphs.length + 1}</span>Justering — protokollet justeras av mötesordförande och en utsedd justerare.</div>
+      ${decisionParas.length ? `
+        <div class="card-head" style="margin-top:22px;"><h2>Föreslagna e-postutgärder</h2></div>
+        ${decisionParas.map(p => `
+          <div class="protocol-email-suggestion" data-para="${p.nr}">
+            <div class="protocol-email-suggestion-text">
+              <b>${p.uppdragstagare === 'Kansliet' ? 'Skicka besked om beslutet' : `Meddela ${p.uppdragstagare}`}</b>
+              ${p.beslut}
+            </div>
+            <button class="btn-ghost" type="button" data-create-draft="${p.nr}">Skapa e-postutkast</button>
+          </div>`).join('')}` : ''}`;
+
+    body.querySelectorAll('[data-create-draft]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const nr = parseInt(btn.dataset.createDraft, 10);
+        const para = currentProtocolResult.paragraphs.find(p => p.nr === nr);
+        createDraftFromProtocol(para);
+        btn.textContent = '✓ Utkast skapat';
+        btn.disabled = true;
+      });
+    });
+  }
+
+  function showProtocolStatus(text) {
+    const el = document.getElementById('protocolStatus');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.add('show');
+    clearTimeout(el._hideTimer);
+    el._hideTimer = setTimeout(() => el.classList.remove('show'), 5000);
+  }
+
+  function printProtocol() {
+    document.body.classList.add('printing-protocol');
+    const cleanup = () => document.body.classList.remove('printing-protocol');
+    window.addEventListener('afterprint', cleanup, { once: true });
+    window.print();
+    setTimeout(cleanup, 3000);
+  }
+
+  function downloadProtocolDoc() {
+    if (!currentProtocolResult) return;
+    const title = document.getElementById('protocolResultTitle').textContent;
+    const bodyHtml = document.getElementById('protocolResultBody').innerHTML;
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title></head>
+      <body style="font-family:Calibri, Arial, sans-serif;"><h1>${title}</h1>${bodyHtml}</body></html>`;
+    const safeName = title.replace(/[^\wÅÄÖåäö -]/g, '');
+    downloadFile(`${safeName}.doc`, html, 'application/msword');
+    showProtocolStatus('Dokumentet är nedladdat — öppnas direkt i Word.');
+  }
+
+  function renderSavedProtocols() {
+    const el = document.getElementById('savedProtocolList');
+    if (!el) return;
+    if (!SAVED_PROTOCOLS.length) {
+      el.innerHTML = '<div class="day-empty">Inga sparade protokoll ännu.</div>';
+      return;
+    }
+    el.innerHTML = SAVED_PROTOCOLS.map((p, idx) => `
+      <div class="saved-protocol-row reveal" ${revealDelay(idx)}>
+        <div>
+          <div class="team-name">${p.title}</div>
+          <div class="team-note">${p.kind === 'dagordning' ? 'Dagordning' : 'Mötesprotokoll'} · Sparat ${formatDateTimeSv(p.savedAt)}</div>
+        </div>
+      </div>`).join('');
+    observeReveals();
+  }
+
+  function saveProtocolToSystem() {
+    if (!currentProtocolResult) return;
+    SAVED_PROTOCOLS.unshift({
+      title: document.getElementById('protocolResultTitle').textContent,
+      kind: currentProtocolResult.kind,
+      savedAt: new Date(),
+    });
+    renderSavedProtocols();
+    showProtocolStatus('Sparat i systemet.');
+  }
+
+  function initProtocolPage() {
+    const generateBtn = document.getElementById('protocolGenerateBtn');
+    if (!generateBtn) return;
+
+    document.getElementById('protocolModeFilters').addEventListener('click', (e) => {
+      const btn = e.target.closest('.pill-filter');
+      if (!btn) return;
+      document.querySelectorAll('#protocolModeFilters .pill-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      protocolMode = btn.dataset.mode;
+      document.getElementById('protocolInputLabel').textContent = protocolMode === 'dagordning'
+        ? 'Klistra in punkter inför mötet (en per rad)'
+        : 'Klistra in anteckningar från mötet (en per rad)';
+      document.getElementById('protocolAttendeesField').style.display = protocolMode === 'protokoll' ? '' : 'none';
+    });
+
+    document.getElementById('protocolFileInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      const note = document.getElementById('protocolFileNote');
+      if (!file) return;
+      if (!/\.(txt|md)$/i.test(file.name)) {
+        note.textContent = 'Det filformatet stöds inte i den här demoversionen — klistra in texten istället.';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        document.getElementById('protocolInput').value = reader.result;
+        note.textContent = `Inläst: ${file.name}`;
+      };
+      reader.readAsText(file);
+    });
+
+    generateBtn.addEventListener('click', () => {
+      const lines = splitProtocolLines(document.getElementById('protocolInput').value);
+      const meetingTitle = document.getElementById('protocolMeetingTitle').value.trim() || 'Möte';
+      if (protocolMode === 'dagordning') {
+        currentProtocolResult = generateAgendaResult(lines, meetingTitle);
+      } else {
+        const attendeesRaw = document.getElementById('protocolAttendees').value;
+        currentProtocolResult = generateProtocolResult(lines, meetingTitle, attendeesRaw);
+      }
+      renderProtocolResult();
+      document.getElementById('protocolResultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    document.getElementById('protocolPrintBtn').addEventListener('click', printProtocol);
+    document.getElementById('protocolDownloadBtn').addEventListener('click', downloadProtocolDoc);
+    document.getElementById('protocolSaveBtn').addEventListener('click', saveProtocolToSystem);
+
+    renderSavedProtocols();
+  }
+
   function renderTimeSaved() {
     const hours = Math.round(totalHoursSaved());
     const krText = (Math.round(totalKrSaved() / 100) * 100).toLocaleString('sv-SE') + ' kr';
@@ -3458,18 +3821,6 @@ Kansliet, Västerås SK</div>
         return 'Närmast i tid: Medlemsansökan – familjen Berg (U10), deadline 24 juli.';
       }
       return 'Jag kan svara på frågor om mejl, fakturor, scheman eller ärenden — men jag kan också göra saker åt dig direkt. Testa till exempel "Skicka ett mejl till Erik om medlemsavgiften" eller "Skapa ett träningsschema".';
-    }
-
-    // ---- Kontaktkatalog för att gissa e-postadress utifrån ett namn ----
-    const CHAT_CONTACTS = {
-      erik: 'erik.soderberg@vasterassk.se',
-      tommy: 'tommy@vasterassk.se',
-      maria: 'maria.lindqvist@vasterassk.se',
-      johan: 'johan.ahlgren@vasterassk.se',
-    };
-    function guessEmailForName(name) {
-      const key = name.toLowerCase();
-      return CHAT_CONTACTS[key] || `${key}@vasterassk.se`;
     }
 
     function extractRecipientName(text) {
@@ -3778,6 +4129,7 @@ Kansliet, Västerås SK</div>
   safe(renderTeams);
   safe(renderFacilities);
   safe(initSchedulePage);
+  safe(initProtocolPage);
   safe(initTabs);
   safe(initFilters);
   safe(initWeekNav);
