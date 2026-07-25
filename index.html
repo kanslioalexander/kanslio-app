@@ -4393,8 +4393,8 @@ ${sectionsHtml}
     document.getElementById('planNameText').textContent = SUBSCRIPTION.plan;
     document.getElementById('planPriceLine').textContent = `${SUBSCRIPTION.price} ${SUBSCRIPTION.cycle}`;
     document.getElementById('planMetaLine').textContent = SUBSCRIPTION.status === 'cancelled'
-      ? `Avslutas ${SUBSCRIPTION.renewal} · ingen ny fakturering därefter`
-      : `Förnyas ${SUBSCRIPTION.renewal}`;
+      ? `Avslutas ${SUBSCRIPTION.renewal} · aktiv fram till dess, ingen ny fakturering därefter`
+      : `Nästa betalning: ${SUBSCRIPTION.renewal}`;
     document.getElementById('planSeats').innerHTML = `${SUBSCRIPTION.seatsUsed}<span class="unit"> av ${SUBSCRIPTION.seatsTotal}</span>`;
     document.getElementById('planFeatures').innerHTML = SUBSCRIPTION.features.map(f => `<li>${f}</li>`).join('');
     const chip = document.getElementById('planStatusChip');
