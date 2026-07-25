@@ -2193,6 +2193,15 @@
       <div id="feedbackOptions"></div>
       <div class="feedback-actions">
         <button class="sub-back" type="button" id="skipFeedbackBtn" style="padding:0;">Avsluta utan att svara</button>
+      </div>
+    </div>
+
+    <div class="sub-step" id="subStepFeedbackFollowup" hidden>
+      <button class="sub-back" type="button" id="followupBack">← Tillbaka</button>
+      <div class="sub-option-title" id="followupQuestion" style="margin-bottom:12px;"></div>
+      <div id="followupOptions"></div>
+      <div class="feedback-actions">
+        <button class="sub-back" type="button" id="skipFollowupBtn" style="padding:0;">Avsluta utan att svara</button>
         <button class="btn-primary" type="button" id="submitFeedbackBtn" disabled>Skicka feedback</button>
       </div>
     </div>
@@ -2430,11 +2439,26 @@
   ];
 
   const FEEDBACK_REASONS = [
-    { key: 'dyrt', label: 'Det var för dyrt' },
-    { key: 'anvande-inte', label: 'Vi använde det inte tillräckligt' },
-    { key: 'saknade-funktion', label: 'Vi saknade en funktion vi behövde' },
-    { key: 'annat-verktyg', label: 'Vi bytte till ett annat verktyg' },
-    { key: 'annat', label: 'Annat skäl' },
+    { key: 'dyrt', label: 'Det var för dyrt', followUp: {
+      question: 'Vad skulle klubben tycka är en rimlig kostnad per månad?',
+      options: ['Under 500 kr/mån', '500–990 kr/mån', '990–1 490 kr/mån', 'Över 1 490 kr/mån'],
+    }},
+    { key: 'anvande-inte', label: 'Vi använde det inte tillräckligt', followUp: {
+      question: 'Vad var den största anledningen till att ni inte använde Kanslio mer?',
+      options: ['Vi hann inte komma igång ordentligt', 'Det passade inte våra rutiner', 'För få i kansliet använde det', 'Vi glömde helt enkelt bort det'],
+    }},
+    { key: 'saknade-funktion', label: 'Vi saknade en funktion vi behövde', followUp: {
+      question: 'Vilken typ av funktion saknade ni mest?',
+      options: ['Koppling till vårt riktiga mejlkonto', 'Medlemsregister/medlemshantering', 'Bokföring/redovisning', 'Något annat'],
+    }},
+    { key: 'annat-verktyg', label: 'Vi bytte till ett annat verktyg', followUp: {
+      question: 'Vilken typ av verktyg bytte ni till?',
+      options: ['Ett annat AI-kansliverktyg', 'Ett vanligt e-post-/kalenderprogram', 'Ett skräddarsytt system', 'Vi gick tillbaka till manuellt arbete'],
+    }},
+    { key: 'annat', label: 'Annat skäl', followUp: {
+      question: 'Vad stämmer bäst in på ert skäl?',
+      options: ['Tekniska problem', 'Support som inte mötte förväntningarna', 'Föreningen lades ner eller slogs ihop', 'Vill helst inte säga'],
+    }},
   ];
 
   const OFFICE_CONTACT = [
@@ -4426,11 +4450,12 @@ ${sectionsHtml}
     const overlay = document.getElementById('manageSubOverlay');
     if (!openBtn || !overlay) return;
 
-    const steps = ['Menu', 'Byt', 'Avsluta', 'Feedback', 'Enterprise', 'Done'].reduce((acc, name) => {
+    const steps = ['Menu', 'Byt', 'Avsluta', 'Feedback', 'FeedbackFollowup', 'Enterprise', 'Done'].reduce((acc, name) => {
       acc[name] = document.getElementById(`subStep${name}`);
       return acc;
     }, {});
     let selectedReason = null;
+    let selectedFollowup = null;
 
     function showStep(name) {
       Object.values(steps).forEach(el => { el.hidden = true; });
@@ -4453,11 +4478,21 @@ ${sectionsHtml}
 
     function renderFeedbackOptions() {
       selectedReason = null;
-      document.getElementById('submitFeedbackBtn').disabled = true;
       document.getElementById('feedbackOptions').innerHTML = FEEDBACK_REASONS.map(r => `
         <button class="feedback-option" type="button" data-reason="${r.key}">
           <span class="feedback-option-dot"></span>
           <span>${r.label}</span>
+        </button>`).join('');
+    }
+
+    function renderFollowup(reason) {
+      selectedFollowup = null;
+      document.getElementById('submitFeedbackBtn').disabled = true;
+      document.getElementById('followupQuestion').textContent = reason.followUp.question;
+      document.getElementById('followupOptions').innerHTML = reason.followUp.options.map(opt => `
+        <button class="feedback-option" type="button" data-followup="${opt}">
+          <span class="feedback-option-dot"></span>
+          <span>${opt}</span>
         </button>`).join('');
     }
 
@@ -4516,12 +4551,25 @@ ${sectionsHtml}
       const btn = e.target.closest('.feedback-option');
       if (!btn) return;
       selectedReason = btn.dataset.reason;
-      overlay.querySelectorAll('.feedback-option').forEach(o => o.classList.toggle('selected', o === btn));
+      const reason = FEEDBACK_REASONS.find(r => r.key === selectedReason);
+      if (!reason) return;
+      renderFollowup(reason);
+      showStep('FeedbackFollowup');
+    });
+
+    document.getElementById('followupBack').addEventListener('click', () => showStep('Feedback'));
+
+    document.getElementById('followupOptions').addEventListener('click', (e) => {
+      const btn = e.target.closest('.feedback-option');
+      if (!btn) return;
+      selectedFollowup = btn.dataset.followup;
+      overlay.querySelectorAll('#followupOptions .feedback-option').forEach(o => o.classList.toggle('selected', o === btn));
       document.getElementById('submitFeedbackBtn').disabled = false;
     });
 
     document.getElementById('submitFeedbackBtn').addEventListener('click', finishCancellation);
     document.getElementById('skipFeedbackBtn').addEventListener('click', finishCancellation);
+    document.getElementById('skipFollowupBtn').addEventListener('click', finishCancellation);
 
     document.getElementById('sendEnterpriseBtn').addEventListener('click', () => {
       finish('Intresseanmälan skickad', 'Tack! Vårt Enterprise-team hör av sig till er lokala kontaktperson inom en arbetsdag.');
