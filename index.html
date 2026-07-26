@@ -299,6 +299,16 @@
   }
   .btn-primary:hover { background: var(--accent-strong); transform: translateY(-1px); box-shadow: var(--shadow-md); }
   .btn-primary:disabled { background: var(--border-strong); color: var(--ink-muted); cursor: not-allowed; box-shadow: none; transform: none; }
+  .btn-danger {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--warn); color: #fff;
+    border: none; padding: 11px 20px; border-radius: var(--r-pill);
+    font-weight: 700; font-size: 14px; cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  }
+  .btn-danger:hover { filter: brightness(.92); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .modal-panel-small { max-width: 420px; }
 
   /* ---------- Stat cards ---------- */
   .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
@@ -1633,6 +1643,50 @@
         </button>
       </div>
 
+      <div class="card card-pad" id="scheduleSettingsCard">
+        <div class="card-head"><h2>Föreningsinställningar</h2></div>
+        <div class="sub-note">De viktigaste inställningarna för schemaläggningen — lägg till lag, sätt standardprioritet och håll koll på hur många lag föreningen har. Allt här sparas automatiskt.</div>
+        <div class="settings-panel open" id="settingsPanel">
+          <div class="form-row">
+            <div class="form-field">
+              <label for="newTeamName">Lägg till lag</label>
+              <input type="text" id="newTeamName" placeholder="T.ex. P8">
+            </div>
+            <div class="form-field">
+              <label for="newTeamCategory">Kategori</label>
+              <select id="newTeamCategory">
+                <option>Herrlag</option>
+                <option>Damlag</option>
+                <option>Ungdom</option>
+                <option>Veteran</option>
+                <option>Övrigt</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-primary" id="addTeamBtn" type="button">+ Lägg till lag</button>
+
+          <div class="settings-stats">
+            <div class="settings-stat">
+              <span>Antal lag i föreningen</span>
+              <strong id="teamCountStat">0</strong>
+            </div>
+            <div class="settings-stat">
+              <span>Standardprioritet för nya lag</span>
+              <select id="defaultPriority">
+                <option value="hog">Hög</option>
+                <option value="medel" selected>Normal</option>
+                <option value="lag">Låg</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>Årskullar och lagkategorier</label>
+            <div class="settings-categories" id="categoryTags"></div>
+          </div>
+        </div>
+      </div>
+
       <div class="mail-hero reveal">
         <div class="mail-hero-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="15" r="5.5"/><circle cx="9" cy="15" r="1.4" fill="currentColor" stroke="none"/><path d="M13.2 11.2L19 5.5M19 5.5h-4.3M19 5.5v4.3"/></svg>
@@ -1688,54 +1742,6 @@
           <button class="btn-ghost" id="publishWebsiteBtn" type="button">Publicera på webbplats</button>
         </div>
         <div class="schedule-status" id="scheduleStatus"></div>
-      </div>
-
-      <div class="card card-pad">
-        <div class="card-head">
-          <h2>Föreningsinställningar</h2>
-          <button class="link" id="settingsToggle" type="button">Visa inställningar
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-        </div>
-        <div class="settings-panel" id="settingsPanel">
-          <div class="form-row">
-            <div class="form-field">
-              <label for="newTeamName">Lägg till lag</label>
-              <input type="text" id="newTeamName" placeholder="T.ex. P8">
-            </div>
-            <div class="form-field">
-              <label for="newTeamCategory">Kategori</label>
-              <select id="newTeamCategory">
-                <option>Herrlag</option>
-                <option>Damlag</option>
-                <option>Ungdom</option>
-                <option>Veteran</option>
-                <option>Övrigt</option>
-              </select>
-            </div>
-          </div>
-          <button class="btn-primary" id="addTeamBtn" type="button">+ Lägg till lag</button>
-
-          <div class="settings-stats">
-            <div class="settings-stat">
-              <span>Antal lag i föreningen</span>
-              <strong id="teamCountStat">0</strong>
-            </div>
-            <div class="settings-stat">
-              <span>Standardprioritet för nya lag</span>
-              <select id="defaultPriority">
-                <option value="hog">Hög</option>
-                <option value="medel" selected>Normal</option>
-                <option value="lag">Låg</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-field">
-            <label>Årskullar och lagkategorier</label>
-            <div class="settings-categories" id="categoryTags"></div>
-          </div>
-        </div>
       </div>
     </section>
 
@@ -2118,6 +2124,23 @@
   <div class="email-doc" id="mailDoc"></div>
 </div>
 
+<!-- Generisk bekräftelse-popup, återanvänds för destruktiva åtgärder som att radera lag -->
+<div class="modal-overlay" id="confirmOverlay">
+  <div class="modal-panel modal-panel-small">
+    <div class="modal-head">
+      <div><h2 id="confirmTitle">Är du säker?</h2></div>
+      <button class="modal-close" id="confirmCloseBtn" aria-label="Stäng">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <p id="confirmText" style="font-size:13.5px; color:var(--ink-secondary); line-height:1.55; margin-bottom:18px;"></p>
+    <div class="form-actions">
+      <button class="btn-ghost" type="button" id="confirmCancelBtn2">Avbryt</button>
+      <button class="btn-danger" type="button" id="confirmOkBtn">Radera</button>
+    </div>
+  </div>
+</div>
+
 <!-- Hantera prenumeration -->
 <div class="modal-overlay" id="manageSubOverlay">
   <div class="modal-panel">
@@ -2281,9 +2304,23 @@
 
 <script>
 (() => {
+  // ---- Sparat läge: allt som går att ändra i appen (lag, mejl, fakturor, ärenden,
+  // prenumeration, protokoll, nyhetsbrev) läses från och skrivs till localStorage,
+  // så att ändringar överlever en omladdning/ny inloggning istället för att nollställas.
+  const STORE_PREFIX = 'kanslioApp:v1:';
+  function loadStored(key, fallback) {
+    try {
+      const raw = localStorage.getItem(STORE_PREFIX + key);
+      return raw === null ? fallback : JSON.parse(raw);
+    } catch (e) { return fallback; }
+  }
+  function saveStored(key, value) {
+    try { localStorage.setItem(STORE_PREFIX + key, JSON.stringify(value)); } catch (e) { /* lagring otillgänglig/full — fortsätt utan att krascha */ }
+  }
+
   const STATUS_LABEL = { ny: 'Ny', pagar: 'Pågår', vantar: 'Väntar svar', klar: 'Klar' };
 
-  const CASES = [
+  const CASES_DEFAULT = [
     { title: 'Medlemsansökan – familjen Berg (U10)', client: 'Innebandysektionen', status: 'pagar', assignee: 'Erik Söderberg', initials: 'ES', deadline: '24 jul' },
     { title: 'Hallbokning – vårsäsongen', client: 'Västerås kommun', status: 'vantar', assignee: 'Maria Lindqvist', initials: 'ML', deadline: '25 jul' },
     { title: 'Försäkringsärende – skada, P14', client: 'Föräldragrupp P14', status: 'ny', assignee: 'Erik Söderberg', initials: 'ES', deadline: '26 jul' },
@@ -2293,6 +2330,7 @@
     { title: 'Domarschema – höstens seriespel', client: 'Fotbollssektionen', status: 'pagar', assignee: 'Erik Söderberg', initials: 'ES', deadline: '1 aug' },
     { title: 'Ledarutbildning – anmälan', client: 'SISU Idrottsutbildarna', status: 'ny', assignee: 'Maria Lindqvist', initials: 'ML', deadline: '3 aug' },
   ];
+  const CASES = loadStored('cases', CASES_DEFAULT);
 
   function getAttentionCases() {
     return CASES.filter(c => c.status !== 'klar').slice(0, 5);
@@ -2331,7 +2369,7 @@
   // 'ny' = skickad, väntar betalning · 'vantar' = påminnelse skickad · 'klar' = betald
   const INVOICE_STATUS_LABEL = { pagar: 'Utkast klart', ny: 'Skickad', vantar: 'Påminnelse skickad', klar: 'Betald' };
 
-  const INVOICES = [
+  const INVOICES_DEFAULT = [
     { title: 'Medlemsfaktura – Familjen Ek', sub: 'Fotboll P16', amount: 800, status: 'pagar', due: 'Skickas 28 jul', handler: 'Kanslio',
       draft: 'Fakturan är ifylld utifrån medlemsregistret — 800 kr för höstterminen, Fotboll P16. Skickas till familjen Eks angivna e-post så snart du godkänner.' },
     { title: 'Leverantörsfaktura – Sportlagret AB', sub: 'Matchtröjor damlag', amount: 12400, status: 'ny', due: 'Förfaller 30 jul', handler: 'ES',
@@ -2349,11 +2387,12 @@
     { title: 'Medlemsfaktura – Familjen Ström', sub: 'Fotboll P10', amount: 800, status: 'pagar', due: 'Skickas 2 aug', handler: 'Kanslio',
       draft: 'Ny medlem registrerad denna vecka — medlemsavgift 800 kr för Fotboll P10, klar att skicka så snart du granskat den.' },
   ];
+  const INVOICES = loadStored('invoices', INVOICES_DEFAULT);
 
   // ---- Schemaplanering: lag, anläggningar och schemagenerering ----
   const DAY_NAMES = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre'];
 
-  const FACILITIES = [
+  const FACILITIES_DEFAULT = [
     { name: 'A-plan', surface: 'Naturgräs', availability: 'Vardagar 16:00–21:00', note: 'Prioriteras av Herrlag och Damlag' },
     { name: 'B-plan', surface: 'Naturgräs', availability: 'Vardagar 16:00–20:00', note: '' },
     { name: 'Konstgräsplan', surface: 'Konstgräs', availability: 'Alla dagar 07:00–22:00', note: 'Belyst för kvällsträning' },
@@ -2361,8 +2400,9 @@
     { name: 'Träningsplan 2', surface: 'Naturgräs', availability: 'Vardagar 16:00–19:00', note: 'Stängd vid regn' },
     { name: 'Inomhushall', surface: 'Inomhus', availability: 'Alla dagar 07:00–22:00', note: 'Delas med innebandy och handboll' },
   ];
+  const FACILITIES = loadStored('facilities', FACILITIES_DEFAULT);
 
-  const TEAMS = [
+  const TEAMS_DEFAULT = [
     { name: 'Herrlag', category: 'Herrlag', freq: 5, preferredDays: ['Mån', 'Tis', 'Ons', 'Tor', 'Fre'], blockedDays: [], time: '17:00', facility: 'A-plan', surface: 'Naturgräs', priority: 'hog' },
     { name: 'Damlag', category: 'Damlag', freq: 4, preferredDays: ['Mån', 'Ons', 'Tor', 'Fre'], blockedDays: [], time: '17:00', facility: 'A-plan', surface: 'Naturgräs', priority: 'hog' },
     { name: 'P13', category: 'Ungdom', freq: 3, preferredDays: ['Mån', 'Ons', 'Fre'], blockedDays: [], time: '16:00', facility: 'Konstgräsplan', surface: 'Konstgräs', priority: 'medel' },
@@ -2372,8 +2412,9 @@
     { name: 'Veteranlag', category: 'Veteran', freq: 1, preferredDays: ['Tis'], blockedDays: [], time: '20:00', facility: 'B-plan', surface: 'Naturgräs', priority: 'lag' },
     { name: 'Övriga lag', category: 'Övrigt', freq: 1, preferredDays: ['Tor'], blockedDays: [], time: '19:00', facility: 'Inomhushall', surface: 'Inomhus', priority: 'lag' },
   ];
+  const TEAMS = loadStored('teams', TEAMS_DEFAULT);
 
-  const MAIL = [
+  const MAIL_DEFAULT = [
     { from: 'Familjen Berg', subject: 'Fråga om medlemsavgift och startdatum', priority: 'hog', time: '03:12',
       draft: 'Hej! Tack för er anmälan av Elin till U10 — avgiften är 800 kr/termin och faktureras via Kanslio i samband med säsongsstart den 12 augusti. Ni får en påminnelse i god tid innan förfallodatum. Välkomna till klubben!' },
     { from: 'Västerås kommun, Fritidsförvaltningen', subject: 'Bekräftelse hallbokning vecka 34', priority: 'hog', time: '03:19',
@@ -2391,6 +2432,7 @@
     { from: 'Revisor, föreningen', subject: 'Underlag till kvartalsbokslut', priority: 'medel', time: '02:35',
       draft: 'Underlag för andra kvartalet är på väg — fakturaunderlag och medlemsintäkter sammanställs och skickas över senast fredag denna vecka.' },
   ];
+  const MAIL = loadStored('mail', MAIL_DEFAULT);
 
   const STATUS_BREAKDOWN = [
     { status: 'ny', count: 6, color: 'var(--neutral-dot)' },
@@ -2434,7 +2476,7 @@
     { name: 'Sara Öhman', email: 'sara.ohman@vasterassk.se', role: 'Ungdomsansvarig', access: 'las', lastActive: '3 dagar sedan', initials: 'SÖ' },
   ];
 
-  const SUBSCRIPTION = {
+  const SUBSCRIPTION_DEFAULT = {
     plan: 'Kanslio Pro', status: 'active',
     price: '1 490 kr', cycle: 'per månad · faktureras årsvis till kansliet',
     renewal: '1 september 2026', seatsUsed: 4, seatsTotal: 5,
@@ -2445,6 +2487,7 @@
       'Prioriterad support',
     ],
   };
+  const SUBSCRIPTION = loadStored('subscription', SUBSCRIPTION_DEFAULT);
 
   const PLAN_OPTIONS = [
     { key: 'bas', name: 'Kanslio Bas', priceValue: 590, price: '590 kr/mån', desc: 'För mindre kanslier: AI-skrivna mejl & fakturor, upp till 2 platser.' },
@@ -2767,6 +2810,7 @@
   }
 
   function renderMail() {
+    saveStored('mail', MAIL);
     const prioLabel = { hog: 'Hög prioritet', medel: 'Medel prioritet', lag: 'Låg prioritet' };
     document.getElementById('mailList').innerHTML = MAIL.map((m, i) => `
       <div class="mail-row reveal" ${revealDelay(i)} data-idx="${i}">
@@ -2916,6 +2960,7 @@
     const c = CASES[idx];
     if (!c || c.status === 'klar') return;
     c.status = 'klar';
+    saveStored('cases', CASES);
     renderTodoSummary();
     if (document.getElementById('fullTable')) renderFullTable();
     renderProgress();
@@ -3028,6 +3073,7 @@
   }
 
   function renderInvoices() {
+    saveStored('invoices', INVOICES);
     const detailLabel = {
       pagar: 'AI-utkast, redo att granska',
       ny: 'Skickad, väntar på betalning',
@@ -3467,6 +3513,35 @@ Kansliet, Västerås SK</div>
 
   const PRIO_LABEL = { hog: 'Hög prioritet', medel: 'Normal prioritet', lag: 'Låg prioritet' };
 
+  // ---- Generisk bekräftelse-popup ("är du säker?") för destruktiva åtgärder ----
+  function confirmDialog(title, text, onConfirm) {
+    const overlay = document.getElementById('confirmOverlay');
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmText').textContent = text;
+    const okBtn = document.getElementById('confirmOkBtn');
+    const cancelBtn = document.getElementById('confirmCancelBtn2');
+    const closeBtn = document.getElementById('confirmCloseBtn');
+
+    function close() {
+      overlay.classList.remove('open');
+      okBtn.removeEventListener('click', ok);
+      cancelBtn.removeEventListener('click', close);
+      closeBtn.removeEventListener('click', close);
+      overlay.removeEventListener('click', onBackdrop);
+      document.removeEventListener('keydown', onEscape);
+    }
+    function ok() { close(); onConfirm(); }
+    function onBackdrop(e) { if (e.target === overlay) close(); }
+    function onEscape(e) { if (e.key === 'Escape') close(); }
+
+    okBtn.addEventListener('click', ok);
+    cancelBtn.addEventListener('click', close);
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', onBackdrop);
+    document.addEventListener('keydown', onEscape);
+    overlay.classList.add('open');
+  }
+
   function dayPickerHTML(team) {
     return DAY_NAMES.map(day => {
       const isBlocked = team.blockedDays.includes(day);
@@ -3514,11 +3589,13 @@ Kansliet, Västerås SK</div>
         </div>
         <div class="detail-actions">
           <button class="btn-primary" type="button" data-save-team="${idx}">Spara ändringar</button>
+          <button class="btn-danger" type="button" data-delete-team="${idx}">Radera lag</button>
         </div>
       </div>`;
   }
 
   function renderTeams() {
+    saveStored('teams', TEAMS);
     document.getElementById('teamList').innerHTML = TEAMS.map((t, idx) => `
       <div class="team-row reveal" ${revealDelay(idx)} data-idx="${idx}">
         <div class="team-row-top">
@@ -3556,6 +3633,21 @@ Kansliet, Västerås SK</div>
       saveBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         saveTeamPreferences(idx, row);
+      });
+
+      const deleteBtn = row.querySelector('[data-delete-team]');
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const team = TEAMS[idx];
+        if (!team) return;
+        confirmDialog(
+          'Radera lag',
+          `Är du säker på att du vill radera laget "${team.name}"? Det går inte att ångra.`,
+          () => {
+            TEAMS.splice(idx, 1);
+            renderTeams();
+          }
+        );
       });
     });
 
@@ -3601,11 +3693,13 @@ Kansliet, Västerås SK</div>
     document.querySelectorAll('[data-facility-availability]').forEach(input => {
       input.addEventListener('change', () => {
         FACILITIES[parseInt(input.dataset.facilityAvailability, 10)].availability = input.value.trim();
+        saveStored('facilities', FACILITIES);
       });
     });
     document.querySelectorAll('[data-facility-note]').forEach(input => {
       input.addEventListener('change', () => {
         FACILITIES[parseInt(input.dataset.facilityNote, 10)].note = input.value.trim();
+        saveStored('facilities', FACILITIES);
       });
     });
     observeReveals();
@@ -3841,14 +3935,6 @@ Kansliet, Västerås SK</div>
     document.getElementById('printScheduleBtn').addEventListener('click', printSchedule);
     document.getElementById('publishWebsiteBtn').addEventListener('click', publishToWebsite);
 
-    const settingsToggleBtn = document.getElementById('settingsToggle');
-    settingsToggleBtn.addEventListener('click', () => {
-      const panel = document.getElementById('settingsPanel');
-      const open = panel.classList.toggle('open');
-      settingsToggleBtn.innerHTML = (open ? 'Dölj inställningar' : 'Visa inställningar') +
-        ' <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
-    });
-
     document.getElementById('addTeamBtn').addEventListener('click', () => {
       const nameInput = document.getElementById('newTeamName');
       const name = nameInput.value.trim();
@@ -3869,7 +3955,7 @@ Kansliet, Västerås SK</div>
   }
 
   // ---- Protokoll & Underlag ----
-  const SAVED_PROTOCOLS = [];
+  const SAVED_PROTOCOLS = loadStored('protocols', []).map(p => ({ ...p, savedAt: new Date(p.savedAt) }));
   let currentProtocolResult = null;
   let protocolMode = 'dagordning';
 
@@ -4038,6 +4124,7 @@ Kansliet, Västerås SK</div>
       kind: currentProtocolResult.kind,
       savedAt: new Date(),
     });
+    saveStored('protocols', SAVED_PROTOCOLS);
     renderSavedProtocols();
     showProtocolStatus('Sparat i systemet.');
   }
@@ -4095,7 +4182,7 @@ Kansliet, Västerås SK</div>
   }
 
   // ---- Nyhetsbrev ----
-  const SAVED_NEWSLETTERS = [];
+  const SAVED_NEWSLETTERS = loadStored('newsletters', []).map(n => ({ ...n, savedAt: new Date(n.savedAt) }));
 
   function newsletterUpperFirst(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 
@@ -4230,6 +4317,7 @@ ${sectionsHtml}
     safe(renderMail);
     safe(renderTodoSummary);
     SAVED_NEWSLETTERS.unshift({ title: nl.rubrik, savedAt: new Date() });
+    saveStored('newsletters', SAVED_NEWSLETTERS);
     renderSavedNewsletters();
     showNewsletterStatus('E-postutkast skapat och nyhetsbrevet sparat — granska och skicka det i Mejl-fliken.');
   }
@@ -4390,6 +4478,7 @@ ${sectionsHtml}
   }
 
   function renderSubscription() {
+    saveStored('subscription', SUBSCRIPTION);
     document.getElementById('planNameText').textContent = SUBSCRIPTION.plan;
     document.getElementById('planPriceLine').textContent = `${SUBSCRIPTION.price} ${SUBSCRIPTION.cycle}`;
     document.getElementById('planMetaLine').textContent = SUBSCRIPTION.status === 'cancelled'
