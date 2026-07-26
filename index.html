@@ -185,8 +185,9 @@
   .logo .dot { color: var(--accent); }
   .sidebar .logo { padding: 6px 12px 22px; font-size: 20px; }
   .club-logo-mark {
-    width: 22px; height: 22px; border-radius: 7px; margin-left: 8px;
+    width: 26px; height: 26px; border-radius: 8px; margin-left: auto;
     background-size: cover; background-position: center; background-color: var(--surface-2);
+    border: 1px solid var(--border);
     align-self: center; flex-shrink: 0;
   }
 
@@ -297,22 +298,33 @@
     background-color: var(--surface); background-size: cover; background-position: center;
   }
 
-  .club-logo-panel { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+  .page-head.page-head-logo { flex-wrap: nowrap; align-items: center; }
+  .page-head-title { flex: 1 1 auto; min-width: 0; }
+
+  .club-logo-panel { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
   .club-logo-big-wrap {
-    width: 96px; height: 96px; border-radius: var(--r-lg);
+    width: 56px; height: 56px; border-radius: var(--r-md); flex-shrink: 0;
     background: var(--surface-2); border: 1px solid var(--border);
     display: flex; align-items: center; justify-content: center; overflow: hidden;
   }
   .club-logo-big-wrap img { width: 100%; height: 100%; object-fit: contain; }
-  .club-logo-placeholder { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--ink-muted); padding: 8px; text-align: center; }
-  .club-logo-placeholder svg { opacity: .6; }
-  .club-logo-placeholder span { font-size: 10.5px; line-height: 1.3; }
-  .club-logo-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .club-logo-placeholder { display: flex; color: var(--ink-muted); opacity: .6; }
+  .club-logo-info { display: flex; flex-direction: column; gap: 3px; }
+  .club-logo-actions { display: flex; align-items: center; gap: 10px; }
+  .club-logo-actions .link {
+    font-size: 13px; font-weight: 700; color: var(--accent-strong);
+    background: none; border: none; cursor: pointer; padding: 2px 0; white-space: nowrap;
+  }
+  .club-logo-actions .link:hover { text-decoration: underline; }
+  .club-logo-actions .link.club-logo-remove { color: var(--ink-muted); }
   .club-logo-status {
-    display: none; margin-top: 4px; padding: 8px 14px; border-radius: var(--r-md);
-    background: var(--good-soft); color: var(--good-ink); font-size: 12.5px; font-weight: 600;
+    display: none; font-size: 11.5px; font-weight: 600; color: var(--good-ink);
   }
   .club-logo-status.show { display: block; }
+  @media (max-width: 640px) {
+    .page-head.page-head-logo { flex-wrap: wrap; }
+    .club-logo-panel { width: 100%; }
+  }
 
   main { flex: 1; padding: 28px; max-width: 1280px; width: 100%; margin: 0 auto; }
   .view { display: none; flex-direction: column; gap: 22px; }
@@ -2005,8 +2017,8 @@
 
     <!-- MITT KANSLIO -->
     <section class="view" id="view-mitt-kanslio">
-      <div class="page-head">
-        <div>
+      <div class="page-head page-head-logo">
+        <div class="page-head-title">
           <h1>Mitt Kanslio</h1>
           <div class="sub">Vilka som har tillgång, er prenumeration och kontaktuppgifter till kansliet</div>
         </div>
@@ -2014,16 +2026,17 @@
           <div class="club-logo-big-wrap">
             <img class="club-logo-slot" id="clubLogoBig" alt="Klubbemblem" style="display:none;">
             <div class="club-logo-placeholder" id="clubLogoPlaceholder">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
-              <span>Ingen klubblogga uppladdad</span>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
             </div>
           </div>
-          <div class="club-logo-actions">
-            <input type="file" id="clubLogoInput" accept="image/png,image/jpeg,image/svg+xml,image/webp" hidden>
-            <button class="btn-ghost" type="button" id="uploadClubLogoBtn">Ladda upp logga</button>
-            <button class="btn-ghost" type="button" id="removeClubLogoBtn" style="display:none;">Ta bort logga</button>
+          <div class="club-logo-info">
+            <div class="club-logo-actions">
+              <input type="file" id="clubLogoInput" accept="image/png,image/jpeg,image/svg+xml,image/webp" hidden>
+              <button class="link" type="button" id="uploadClubLogoBtn">Ladda upp logga</button>
+              <button class="link club-logo-remove" type="button" id="removeClubLogoBtn" style="display:none;">Ta bort</button>
+            </div>
+            <div class="club-logo-status" id="clubLogoStatus"></div>
           </div>
-          <div class="club-logo-status" id="clubLogoStatus"></div>
         </div>
       </div>
 
