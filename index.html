@@ -184,6 +184,11 @@
   }
   .logo .dot { color: var(--accent); }
   .sidebar .logo { padding: 6px 12px 22px; font-size: 20px; }
+  .club-logo-mark {
+    width: 22px; height: 22px; border-radius: 7px; margin-left: 8px;
+    background-size: cover; background-position: center; background-color: var(--surface-2);
+    align-self: center; flex-shrink: 0;
+  }
 
   .sidebar-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
   .nav-item {
@@ -222,6 +227,13 @@
   .sidebar-foot .who { flex: 1; min-width: 0; }
   .sidebar-foot .who .name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .sidebar-foot .who .role { font-size: 11.5px; color: var(--ink-muted); }
+  .sidebar-foot-link {
+    display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;
+    background: none; border: none; padding: 4px; margin: -4px; border-radius: var(--r-md);
+    cursor: pointer; text-align: left; font: inherit; color: inherit;
+    transition: background .15s ease;
+  }
+  .sidebar-foot-link:hover { background: var(--surface-2); }
 
   .main-col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
@@ -281,6 +293,26 @@
     font-weight: 700; font-size: 13px;
     flex-shrink: 0;
   }
+  .avatar.club-logo-slot.has-logo {
+    background-color: var(--surface); background-size: cover; background-position: center;
+  }
+
+  .club-logo-panel { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+  .club-logo-big-wrap {
+    width: 96px; height: 96px; border-radius: var(--r-lg);
+    background: var(--surface-2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  .club-logo-big-wrap img { width: 100%; height: 100%; object-fit: contain; }
+  .club-logo-placeholder { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--ink-muted); padding: 8px; text-align: center; }
+  .club-logo-placeholder svg { opacity: .6; }
+  .club-logo-placeholder span { font-size: 10.5px; line-height: 1.3; }
+  .club-logo-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .club-logo-status {
+    display: none; margin-top: 4px; padding: 8px 14px; border-radius: var(--r-md);
+    background: var(--good-soft); color: var(--good-ink); font-size: 12.5px; font-weight: 600;
+  }
+  .club-logo-status.show { display: block; }
 
   main { flex: 1; padding: 28px; max-width: 1280px; width: 100%; margin: 0 auto; }
   .view { display: none; flex-direction: column; gap: 22px; }
@@ -1272,7 +1304,10 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="logo"><span class="word">Kanslio</span><span class="dot">.</span></div>
+    <div class="logo">
+      <span class="word">Kanslio</span><span class="dot">.</span>
+      <span class="club-logo-mark club-logo-slot" id="sidebarLogoMark" style="display:none;" aria-hidden="true"></span>
+    </div>
 
     <nav class="sidebar-nav" role="tablist" aria-label="Huvudnavigering" id="tabs">
       <button class="nav-item active" role="tab" aria-selected="true" data-view="oversikt">
@@ -1324,11 +1359,13 @@
     </nav>
 
     <div class="sidebar-foot">
-      <div class="avatar">ES</div>
-      <div class="who">
-        <div class="name">Erik Söderberg</div>
-        <div class="role">Handläggare</div>
-      </div>
+      <button class="sidebar-foot-link" type="button" data-goto="mitt-kanslio" aria-label="Gå till Mitt Kanslio">
+        <div class="avatar club-logo-slot" id="sidebarAvatar">ES</div>
+        <div class="who">
+          <div class="name">Erik Söderberg</div>
+          <div class="role">Handläggare</div>
+        </div>
+      </button>
       <button class="icon-btn" id="themeToggle" aria-label="Växla mellan ljust och mörkt läge">
         <svg id="iconSun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12H5M19 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></svg>
         <svg id="iconMoon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5z"/></svg>
@@ -1973,6 +2010,21 @@
           <h1>Mitt Kanslio</h1>
           <div class="sub">Vilka som har tillgång, er prenumeration och kontaktuppgifter till kansliet</div>
         </div>
+        <div class="club-logo-panel">
+          <div class="club-logo-big-wrap">
+            <img class="club-logo-slot" id="clubLogoBig" alt="Klubbemblem" style="display:none;">
+            <div class="club-logo-placeholder" id="clubLogoPlaceholder">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+              <span>Ingen klubblogga uppladdad</span>
+            </div>
+          </div>
+          <div class="club-logo-actions">
+            <input type="file" id="clubLogoInput" accept="image/png,image/jpeg,image/svg+xml,image/webp" hidden>
+            <button class="btn-ghost" type="button" id="uploadClubLogoBtn">Ladda upp logga</button>
+            <button class="btn-ghost" type="button" id="removeClubLogoBtn" style="display:none;">Ta bort logga</button>
+          </div>
+          <div class="club-logo-status" id="clubLogoStatus"></div>
+        </div>
       </div>
 
       <div class="plan-hero reveal">
@@ -2488,6 +2540,7 @@
     ],
   };
   const SUBSCRIPTION = loadStored('subscription', SUBSCRIPTION_DEFAULT);
+  let CLUB_LOGO = loadStored('clubLogo', null);
 
   const PLAN_OPTIONS = [
     { key: 'bas', name: 'Kanslio Bas', priceValue: 590, price: '590 kr/mån', desc: 'För mindre kanslier: AI-skrivna mejl & fakturor, upp till 2 platser.' },
@@ -4835,6 +4888,78 @@ ${sectionsHtml}
     document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
   }
 
+  // ---- Klubblogga: uppladdad bild sparas och visas i sidomenyn + Mitt Kanslio ----
+  function showClubLogoStatus(text) {
+    const el = document.getElementById('clubLogoStatus');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.add('show');
+    clearTimeout(el._hideTimer);
+    el._hideTimer = setTimeout(() => el.classList.remove('show'), 4000);
+  }
+
+  function renderClubLogo() {
+    saveStored('clubLogo', CLUB_LOGO);
+
+    document.querySelectorAll('.club-logo-slot').forEach(el => {
+      if (el.tagName === 'IMG') {
+        if (CLUB_LOGO) el.src = CLUB_LOGO; else el.removeAttribute('src');
+        el.style.display = CLUB_LOGO ? 'block' : 'none';
+      } else {
+        el.classList.toggle('has-logo', !!CLUB_LOGO);
+        el.style.backgroundImage = CLUB_LOGO ? `url("${CLUB_LOGO}")` : '';
+        el.style.display = (el.id === 'sidebarLogoMark') ? (CLUB_LOGO ? 'block' : 'none') : '';
+      }
+    });
+
+    const sidebarAvatar = document.getElementById('sidebarAvatar');
+    if (sidebarAvatar) sidebarAvatar.textContent = CLUB_LOGO ? '' : 'ES';
+
+    const placeholder = document.getElementById('clubLogoPlaceholder');
+    if (placeholder) placeholder.style.display = CLUB_LOGO ? 'none' : 'flex';
+
+    const removeBtn = document.getElementById('removeClubLogoBtn');
+    if (removeBtn) removeBtn.style.display = CLUB_LOGO ? 'inline-flex' : 'none';
+  }
+
+  function initClubLogo() {
+    const input = document.getElementById('clubLogoInput');
+    if (!input) return;
+
+    document.getElementById('uploadClubLogoBtn').addEventListener('click', () => input.click());
+
+    input.addEventListener('change', () => {
+      const file = input.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        showClubLogoStatus('Det där är ingen bildfil — välj en bild (PNG, JPG, SVG eller WebP).');
+        input.value = '';
+        return;
+      }
+      if (file.size > 3 * 1024 * 1024) {
+        showClubLogoStatus('Bilden är för stor (max 3 MB) — välj en mindre bild.');
+        input.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        CLUB_LOGO = reader.result;
+        renderClubLogo();
+        showClubLogoStatus('Klubbloggan är uppladdad och sparad.');
+        input.value = '';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('removeClubLogoBtn').addEventListener('click', () => {
+      CLUB_LOGO = null;
+      renderClubLogo();
+      showClubLogoStatus('Klubbloggan är borttagen.');
+    });
+
+    renderClubLogo();
+  }
+
   function initTabs() {
     const btns = [...document.querySelectorAll('.nav-item[data-view]')];
     btns.forEach(b => b.addEventListener('click', () => activate(b.dataset.view)));
@@ -5236,6 +5361,7 @@ ${sectionsHtml}
   safe(initFAQ);
   safe(initManageSubscription);
   safe(initTabs);
+  safe(initClubLogo);
   safe(initFilters);
   safe(initWeekNav);
   safe(initChat);
