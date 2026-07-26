@@ -184,12 +184,6 @@
   }
   .logo .dot { color: var(--accent); }
   .sidebar .logo { padding: 6px 12px 22px; font-size: 20px; }
-  .club-logo-mark {
-    width: 26px; height: 26px; border-radius: 8px; margin-left: auto;
-    background-size: cover; background-position: center; background-color: var(--surface-2);
-    border: 1px solid var(--border);
-    align-self: center; flex-shrink: 0;
-  }
 
   .sidebar-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
   .nav-item {
@@ -301,14 +295,21 @@
   .page-head.page-head-logo { flex-wrap: nowrap; align-items: center; }
   .page-head-title { flex: 1 1 auto; min-width: 0; }
 
-  .club-logo-panel { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+  .club-logo-panel { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
   .club-logo-big-wrap {
-    width: 56px; height: 56px; border-radius: var(--r-md); flex-shrink: 0;
+    width: 140px; height: 140px; border-radius: var(--r-lg); flex-shrink: 0;
     background: var(--surface-2); border: 1px solid var(--border);
     display: flex; align-items: center; justify-content: center; overflow: hidden;
+    position: relative; padding: 0; cursor: pointer; font: inherit;
   }
   .club-logo-big-wrap img { width: 100%; height: 100%; object-fit: contain; }
   .club-logo-placeholder { display: flex; color: var(--ink-muted); opacity: .6; }
+  .club-logo-hover {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,.5); color: #fff; font-size: 12.5px; font-weight: 700;
+    opacity: 0; transition: opacity .15s ease;
+  }
+  .club-logo-big-wrap:hover .club-logo-hover { opacity: 1; }
   .club-logo-info { display: flex; flex-direction: column; gap: 3px; }
   .club-logo-actions { display: flex; align-items: center; gap: 10px; }
   .club-logo-actions .link {
@@ -321,6 +322,18 @@
     display: none; font-size: 11.5px; font-weight: 600; color: var(--good-ink);
   }
   .club-logo-status.show { display: block; }
+
+  .payment-method-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-top: 6px; }
+  .payment-card-icon {
+    width: 52px; height: 36px; border-radius: 8px; flex-shrink: 0;
+    background: var(--surface-2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 10px; letter-spacing: .03em; color: var(--ink-secondary);
+  }
+  .payment-card-info { flex: 1; min-width: 160px; }
+  .payment-card-number { font-weight: 700; font-size: 14.5px; letter-spacing: .03em; }
+  .payment-card-meta { font-size: 12.5px; color: var(--ink-muted); margin-top: 2px; }
+  .payment-card-empty { flex: 1; color: var(--ink-muted); font-size: 13.5px; }
   @media (max-width: 640px) {
     .page-head.page-head-logo { flex-wrap: wrap; }
     .club-logo-panel { width: 100%; }
@@ -1318,7 +1331,6 @@
   <aside class="sidebar">
     <div class="logo">
       <span class="word">Kanslio</span><span class="dot">.</span>
-      <span class="club-logo-mark club-logo-slot" id="sidebarLogoMark" style="display:none;" aria-hidden="true"></span>
     </div>
 
     <nav class="sidebar-nav" role="tablist" aria-label="Huvudnavigering" id="tabs">
@@ -2023,16 +2035,16 @@
           <div class="sub">Vilka som har tillgång, er prenumeration och kontaktuppgifter till kansliet</div>
         </div>
         <div class="club-logo-panel">
-          <div class="club-logo-big-wrap">
+          <button class="club-logo-big-wrap" type="button" id="uploadClubLogoBtn" aria-label="Ladda upp klubblogga">
             <img class="club-logo-slot" id="clubLogoBig" alt="Klubbemblem" style="display:none;">
             <div class="club-logo-placeholder" id="clubLogoPlaceholder">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
             </div>
-          </div>
+            <div class="club-logo-hover">Ladda upp</div>
+          </button>
           <div class="club-logo-info">
+            <input type="file" id="clubLogoInput" accept="image/png,image/jpeg,image/svg+xml,image/webp" hidden>
             <div class="club-logo-actions">
-              <input type="file" id="clubLogoInput" accept="image/png,image/jpeg,image/svg+xml,image/webp" hidden>
-              <button class="link" type="button" id="uploadClubLogoBtn">Ladda upp logga</button>
               <button class="link club-logo-remove" type="button" id="removeClubLogoBtn" style="display:none;">Ta bort</button>
             </div>
             <div class="club-logo-status" id="clubLogoStatus"></div>
@@ -2059,6 +2071,27 @@
         <ul class="plan-features" id="planFeatures"></ul>
         <div class="plan-actions">
           <button class="btn-ghost" id="manageSubBtn" type="button">Hantera prenumeration</button>
+        </div>
+      </div>
+
+      <div class="card card-pad reveal">
+        <div class="card-head"><h2>Betalmetod &amp; fakturering</h2></div>
+        <div class="sub-note">Kortuppgifter hanteras av vår betalningsleverantör och lagras aldrig i klartext hos Kanslio.</div>
+        <div class="payment-method-row" id="paymentMethodRow"></div>
+
+        <div class="form-row" style="margin-top:22px;">
+          <div class="form-field">
+            <label for="billingOrgNr">Organisationsnummer</label>
+            <input type="text" id="billingOrgNr" placeholder="802xxx-xxxx">
+          </div>
+          <div class="form-field">
+            <label for="billingEmail">E-post för kvitton</label>
+            <input type="email" id="billingEmail" placeholder="ekonomi@vasterassk.se">
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="billingAddress">Faktureringsadress</label>
+          <input type="text" id="billingAddress" placeholder="Gatuadress, postnummer, ort">
         </div>
       </div>
 
@@ -2334,6 +2367,45 @@
   </div>
 </div>
 
+<!-- Betalmetod -->
+<div class="modal-overlay" id="paymentFormOverlay">
+  <div class="modal-panel">
+    <div class="modal-head">
+      <div>
+        <h2>Betalmetod</h2>
+        <p>Uppgifterna skickas krypterat och lagras aldrig i klartext hos Kanslio.</p>
+      </div>
+      <button class="modal-close" id="paymentFormClose" aria-label="Stäng">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <form id="paymentForm">
+      <div class="form-field">
+        <label for="cardName">Kortinnehavarens namn</label>
+        <input type="text" id="cardName" placeholder="Erik Söderberg" required>
+      </div>
+      <div class="form-field">
+        <label for="cardNumber">Kortnummer</label>
+        <input type="text" id="cardNumber" inputmode="numeric" maxlength="19" placeholder="0000 0000 0000 0000" required>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="cardExpiry">Giltigt till (MM/ÅÅ)</label>
+          <input type="text" id="cardExpiry" inputmode="numeric" maxlength="5" placeholder="MM/ÅÅ" required>
+        </div>
+        <div class="form-field">
+          <label for="cardCvc">CVC</label>
+          <input type="text" id="cardCvc" inputmode="numeric" maxlength="4" placeholder="123" required>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-ghost" type="button" id="paymentFormCancel">Avbryt</button>
+        <button class="btn-primary" type="submit">Spara betalmetod</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- Chat -->
 <button class="chat-launcher" id="chatLauncher" aria-label="Öppna assistent" aria-expanded="false">
   <span class="badge"></span>
@@ -2554,6 +2626,8 @@
   };
   const SUBSCRIPTION = loadStored('subscription', SUBSCRIPTION_DEFAULT);
   let CLUB_LOGO = loadStored('clubLogo', null);
+  let PAYMENT_METHOD = loadStored('paymentMethod', null);
+  let BILLING_INFO = loadStored('billingInfo', { orgNr: '', email: '', address: '' });
 
   const PLAN_OPTIONS = [
     { key: 'bas', name: 'Kanslio Bas', priceValue: 590, price: '590 kr/mån', desc: 'För mindre kanslier: AI-skrivna mejl & fakturor, upp till 2 platser.' },
@@ -4921,7 +4995,6 @@ ${sectionsHtml}
       } else {
         el.classList.toggle('has-logo', !!CLUB_LOGO);
         el.style.backgroundImage = CLUB_LOGO ? `url("${CLUB_LOGO}")` : '';
-        el.style.display = (el.id === 'sidebarLogoMark') ? (CLUB_LOGO ? 'block' : 'none') : '';
       }
     });
 
@@ -4971,6 +5044,92 @@ ${sectionsHtml}
     });
 
     renderClubLogo();
+  }
+
+  // ---- Betalmetod & fakturering ----
+  function detectCardBrand(digits) {
+    if (/^4/.test(digits)) return 'VISA';
+    if (/^5[1-5]/.test(digits)) return 'MASTERCARD';
+    if (/^3[47]/.test(digits)) return 'AMEX';
+    return 'KORT';
+  }
+
+  function renderPaymentMethodRow() {
+    const el = document.getElementById('paymentMethodRow');
+    if (!el) return;
+    const pm = PAYMENT_METHOD;
+    el.innerHTML = pm ? `
+      <div class="payment-card-icon">${pm.brand}</div>
+      <div class="payment-card-info">
+        <div class="payment-card-number">•••• •••• •••• ${pm.last4}</div>
+        <div class="payment-card-meta">${pm.name} · Utgår ${pm.expiry}</div>
+      </div>
+      <button class="btn-ghost" type="button" id="changePaymentBtn">Byt betalmetod</button>
+    ` : `
+      <div class="payment-card-empty">Ingen betalmetod tillagd ännu.</div>
+      <button class="btn-primary" type="button" id="changePaymentBtn">Lägg till betalmetod</button>
+    `;
+    const btn = document.getElementById('changePaymentBtn');
+    if (btn) btn.addEventListener('click', () => document.getElementById('paymentFormOverlay').classList.add('open'));
+  }
+
+  function initPaymentMethod() {
+    const row = document.getElementById('paymentMethodRow');
+    if (!row) return;
+    renderPaymentMethodRow();
+
+    const overlay = document.getElementById('paymentFormOverlay');
+    const form = document.getElementById('paymentForm');
+    const closeModal = () => overlay.classList.remove('open');
+
+    document.getElementById('paymentFormClose').addEventListener('click', closeModal);
+    document.getElementById('paymentFormCancel').addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+
+    document.getElementById('cardNumber').addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
+    });
+    document.getElementById('cardExpiry').addEventListener('input', (e) => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 4);
+      if (v.length > 2) v = v.slice(0, 2) + '/' + v.slice(2);
+      e.target.value = v;
+    });
+    document.getElementById('cardCvc').addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const digits = document.getElementById('cardNumber').value.replace(/\D/g, '');
+      PAYMENT_METHOD = {
+        name: document.getElementById('cardName').value.trim(),
+        last4: digits.slice(-4),
+        expiry: document.getElementById('cardExpiry').value.trim(),
+        brand: detectCardBrand(digits),
+      };
+      saveStored('paymentMethod', PAYMENT_METHOD);
+      renderPaymentMethodRow();
+      form.reset();
+      closeModal();
+    });
+  }
+
+  function initBillingInfo() {
+    const orgNr = document.getElementById('billingOrgNr');
+    if (!orgNr) return;
+    const email = document.getElementById('billingEmail');
+    const address = document.getElementById('billingAddress');
+
+    orgNr.value = BILLING_INFO.orgNr;
+    email.value = BILLING_INFO.email;
+    address.value = BILLING_INFO.address;
+
+    [orgNr, email, address].forEach(input => {
+      input.addEventListener('change', () => {
+        BILLING_INFO = { orgNr: orgNr.value.trim(), email: email.value.trim(), address: address.value.trim() };
+        saveStored('billingInfo', BILLING_INFO);
+      });
+    });
   }
 
   function initTabs() {
@@ -5375,6 +5534,8 @@ ${sectionsHtml}
   safe(initManageSubscription);
   safe(initTabs);
   safe(initClubLogo);
+  safe(initPaymentMethod);
+  safe(initBillingInfo);
   safe(initFilters);
   safe(initWeekNav);
   safe(initChat);
