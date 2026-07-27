@@ -424,17 +424,6 @@
     }
     .footer-right { font-size: 0.78rem; color: rgba(244,238,225,0.3); }
 
-    /* ── TYPEWRITER HEADINGS ──────────────── */
-    .type-cursor {
-      display: inline-block; width: 3px; height: 0.82em;
-      background: currentColor; margin-left: 2px; vertical-align: text-bottom;
-      animation: typeBlink 0.85s step-end infinite;
-    }
-    @keyframes typeBlink { 50% { opacity: 0; } }
-    @media (prefers-reduced-motion: reduce) {
-      .type-cursor { display: none; }
-    }
-
     /* ── REVEAL-ON-SCROLL ─────────────────── */
     .reveal {
       opacity: 0; transform: translateY(28px);
@@ -530,7 +519,7 @@
     Beta öppen — vi tar in testklubbar nu
   </div>
 
-  <h1 class="type-heading">AI som tar hand om<br>klubbens adminarbete</h1>
+  <h1>AI som tar hand om<br>klubbens adminarbete</h1>
 
   <p>Kommunikation, scheman och löpande administration — automatiserat för kanslister och klubbledning.</p>
 
@@ -568,7 +557,7 @@
 <!-- SOLUTION / FEATURES -->
 <section class="section alt reveal" id="losning">
   <p class="eyebrow">Lösningen</p>
-  <h2 class="type-heading">En AI-administratör för hela klubben</h2>
+  <h2>En AI-administratör för hela klubben</h2>
   <p class="sub">Kanslio hanterar kommunikation, scheman och adminflöden — där timmarna faktiskt försvinner.</p>
 
   <div class="features-grid">
@@ -602,7 +591,7 @@
 <!-- HOW IT WORKS -->
 <section class="section alt reveal" id="sa-funkar-det">
   <p class="eyebrow">Så funkar det</p>
-  <h2 class="type-heading">Från admin-tungt till admin-lätt</h2>
+  <h2>Från admin-tungt till admin-lätt</h2>
   <p class="sub">Vi startar smalt, mäter, och bygger ut i er takt.</p>
 
   <div class="steps-grid">
@@ -627,7 +616,7 @@
 <!-- PRICING -->
 <section class="section alt reveal" id="priser">
   <p class="eyebrow">Priser</p>
-  <h2 class="type-heading">Enkel prissättning</h2>
+  <h2>Enkel prissättning</h2>
   <p class="sub">Under beta är det gratis. Efteråt väljer ni rätt plan — inga dolda avgifter.</p>
 
   <div class="pricing-grid">
@@ -665,7 +654,7 @@
 <!-- FAQ -->
 <section class="section alt reveal" id="faq">
   <p class="eyebrow">Vanliga frågor</p>
-  <h2 class="type-heading">Korta svar</h2>
+  <h2>Korta svar</h2>
 
   <div class="faq-list">
     <div class="faq-item">
@@ -690,7 +679,7 @@
 <!-- FORM -->
 <section class="section alt reveal" id="kontakt">
   <p class="eyebrow">Ansök</p>
-  <h2 class="type-heading">Bli betaklubb</h2>
+  <h2>Bli betaklubb</h2>
   <p class="sub" style="margin-bottom:2.25rem">Vi hör av oss inom 2 arbetsdagar för att boka ett kort samtal.</p>
 
   <div class="form-cols">
@@ -787,65 +776,6 @@ navToggle.addEventListener('click', () => {
   navToggle.classList.contains('open') ? closeMobileNav() : openMobileNav();
 });
 mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMobileNav));
-
-// ---- Typewriter headings (Klarna-style "text being typed") ----
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-function typewriteHeading(el, speed = 22) {
-  if (el.dataset.typed) return;
-  el.dataset.typed = '1';
-
-  const parts = el.innerHTML.split(/<br\s*\/?>/i);
-  el.innerHTML = '';
-
-  if (reduceMotion) {
-    el.innerHTML = parts.join('<br>');
-    return;
-  }
-
-  const cursor = document.createElement('span');
-  cursor.className = 'type-cursor';
-  el.appendChild(cursor);
-
-  let partIndex = 0, charIndex = 0;
-  function step() {
-    const current = parts[partIndex];
-    if (charIndex < current.length) {
-      el.insertBefore(document.createTextNode(current[charIndex]), cursor);
-      charIndex++;
-      setTimeout(step, speed);
-    } else if (partIndex < parts.length - 1) {
-      el.insertBefore(document.createElement('br'), cursor);
-      partIndex++;
-      charIndex = 0;
-      setTimeout(step, speed * 4);
-    } else {
-      setTimeout(() => cursor.remove(), 600);
-    }
-  }
-  step();
-}
-
-// Hero headline types immediately on load
-const heroHeading = document.querySelector('.hero h1.type-heading');
-if (heroHeading) setTimeout(() => typewriteHeading(heroHeading, 26), 350);
-
-// Section headings type when scrolled into view
-const typeHeadings = document.querySelectorAll('h2.type-heading');
-if ('IntersectionObserver' in window && typeHeadings.length) {
-  const typeObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        typewriteHeading(entry.target);
-        typeObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.4 });
-  typeHeadings.forEach(el => typeObserver.observe(el));
-  setTimeout(() => typeHeadings.forEach(el => typewriteHeading(el)), 4000);
-} else {
-  typeHeadings.forEach(el => typewriteHeading(el));
-}
 
 // ---- Reveal-on-scroll ----
 const revealEls = document.querySelectorAll('.reveal');
