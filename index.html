@@ -63,9 +63,10 @@
       background: var(--navy); color: var(--white);
       padding: 0.5rem 1.25rem; border-radius: 6px;
       font-size: 0.875rem; font-weight: 600;
-      text-decoration: none; transition: background 0.15s;
+      text-decoration: none; transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+      box-shadow: 0 0 0 rgba(60,120,216,0);
     }
-    .nav-cta:hover { background: var(--mid); }
+    .nav-cta:hover { background: var(--mid); box-shadow: 0 0 0 3px rgba(60,120,216,0.18), 0 4px 16px rgba(60,120,216,0.25); transform: translateY(-1px); }
 
     /* ── HERO ─────────────────────────────── */
     .hero {
@@ -132,10 +133,10 @@
       padding: 0.85rem 1.85rem; border-radius: 6px;
       font-weight: 700; font-size: 0.925rem;
       text-decoration: none;
-      transition: background 0.15s, transform 0.15s;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
       box-shadow: 0 4px 20px rgba(60,120,216,0.35);
     }
-    .btn-blue:hover { background: #2d66c4; transform: translateY(-1px); }
+    .btn-blue:hover { background: #2d66c4; transform: translateY(-1px); box-shadow: 0 4px 28px rgba(60,120,216,0.55), 0 0 0 3px rgba(60,120,216,0.15); }
 
     .btn-ghost {
       display: inline-flex; align-items: center;
@@ -144,9 +145,9 @@
       font-weight: 600; font-size: 0.925rem;
       text-decoration: none;
       border: 1px solid rgba(244,238,225,0.2);
-      transition: border-color 0.15s, color 0.15s;
+      transition: border-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.2s;
     }
-    .btn-ghost:hover { border-color: rgba(244,238,225,0.5); color: var(--cream); }
+    .btn-ghost:hover { border-color: rgba(244,238,225,0.5); color: var(--cream); box-shadow: 0 0 18px rgba(244,238,225,0.12); transform: translateY(-1px); }
 
     .hero-tagline {
       font-size: 0.65rem; font-weight: 700;
@@ -295,12 +296,12 @@
       padding: 0.8rem; border-radius: 6px;
       font-weight: 700; font-size: 0.9rem;
       text-decoration: none; border: none; cursor: pointer;
-      font-family: 'Inter', sans-serif; transition: background 0.15s, border-color 0.15s;
+      font-family: 'Inter', sans-serif; transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
     }
     .plan-btn.primary { background: var(--navy); color: var(--white); }
-    .plan-btn.primary:hover { background: var(--mid); }
+    .plan-btn.primary:hover { background: var(--mid); box-shadow: 0 0 0 3px rgba(60,120,216,0.15), 0 4px 18px rgba(60,120,216,0.3); transform: translateY(-1px); }
     .plan-btn.outline { border: 1.5px solid var(--border); color: var(--navy); background: transparent; }
-    .plan-btn.outline:hover { border-color: var(--navy); }
+    .plan-btn.outline:hover { border-color: var(--navy); box-shadow: 0 0 14px rgba(27,42,74,0.12); transform: translateY(-1px); }
     .pricing-note { font-size: 0.78rem; color: var(--muted); margin-top: 1.25rem; }
 
     /* ── FAQ ──────────────────────────────── */
@@ -350,9 +351,9 @@
       background: var(--navy); color: var(--white); border: none; cursor: pointer;
       font-family: 'Inter', sans-serif; padding: 0.85rem;
       border-radius: 6px; font-weight: 700; font-size: 0.95rem;
-      transition: background 0.15s; width: 100%; margin-top: 0.2rem;
+      transition: background 0.2s, box-shadow 0.2s; width: 100%; margin-top: 0.2rem;
     }
-    .form-submit:hover { background: var(--mid); }
+    .form-submit:hover { background: var(--mid); box-shadow: 0 0 0 3px rgba(60,120,216,0.15), 0 4px 18px rgba(60,120,216,0.3); }
     .form-note { font-size: 0.73rem; color: var(--muted); text-align: center; }
 
     /* ── FOOTER ───────────────────────────── */
