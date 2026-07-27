@@ -4,6 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kanslio — AI-admin för idrottsklubbar</title>
+  <meta name="description" content="Kommunikation, scheman och löpande administration — automatiserat för kanslister och klubbledning.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Kanslio — AI-admin för idrottsklubbar">
+  <meta property="og:description" content="Kommunikation, scheman och löpande administration — automatiserat för kanslister och klubbledning.">
+  <meta property="og:image" content="hero-bg.jpg">
+  <meta property="og:url" content="https://kanslio.com/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Kanslio — AI-admin för idrottsklubbar">
+  <meta name="twitter:description" content="Kommunikation, scheman och löpande administration — automatiserat för kanslister och klubbledning.">
+  <meta name="twitter:image" content="hero-bg.jpg">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="icon-180.png">
   <link rel="manifest" href="manifest.json">
@@ -68,6 +78,36 @@
     }
     .nav-cta:hover { background: var(--mid); box-shadow: 0 0 0 3px rgba(60,120,216,0.18), 0 4px 16px rgba(60,120,216,0.25); transform: translateY(-1px); }
 
+    .nav-toggle {
+      display: none; width: 36px; height: 36px; border: none; background: transparent;
+      cursor: pointer; align-items: center; justify-content: center; flex-direction: column; gap: 5px;
+      flex-shrink: 0;
+    }
+    .nav-toggle span { display: block; width: 20px; height: 2px; background: var(--navy); border-radius: 2px; transition: transform 0.2s ease, opacity 0.2s ease; }
+    .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-toggle.open span:nth-child(2) { opacity: 0; }
+    .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-nav {
+      display: none;
+      position: fixed; top: 64px; left: 0; right: 0; z-index: 99;
+      background: var(--white); border-bottom: 1px solid var(--border);
+      box-shadow: 0 16px 32px rgba(17,24,39,0.12);
+      padding: 0.25rem 5% 1.25rem;
+      opacity: 0; transform: translateY(-10px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .mobile-nav.open { display: block; }
+    .mobile-nav.open.show { opacity: 1; transform: translateY(0); }
+    .mobile-nav ul { list-style: none; }
+    .mobile-nav ul a {
+      display: block; padding: 0.9rem 0; text-decoration: none; color: var(--text);
+      font-weight: 600; font-size: 0.95rem; border-bottom: 1px solid var(--border);
+    }
+    .mobile-nav-actions { display: flex; flex-direction: column; gap: 0.65rem; margin-top: 0.9rem; }
+    .mobile-nav-actions .nav-login { text-align: center; padding: 0.7rem 0; border: 1px solid var(--border); border-radius: 6px; }
+    .mobile-nav-actions .nav-cta { text-align: center; }
+
     /* ── HERO ─────────────────────────────── */
     .hero {
       min-height: 100vh;
@@ -76,22 +116,40 @@
       text-align: center;
       padding: 5rem 5% 4rem;
       background: var(--deep);
-      background-image:
-        linear-gradient(rgba(12,21,36,0.62), rgba(12,21,36,0.78)),
-        radial-gradient(ellipse 70% 50% at 50% 100%, rgba(60,120,216,0.22) 0%, transparent 100%),
-        radial-gradient(ellipse 30% 25% at 15% 60%, rgba(60,120,216,0.06) 0%, transparent 100%),
-        url('hero-bg.jpg');
-      background-size: cover, cover, cover, cover;
-      background-position: center, center, center, center 30%;
       position: relative; overflow: clip;
+    }
+    .hero-bg-photo {
+      position: absolute; inset: 0; z-index: 0;
+      background-image: url('hero-bg.jpg');
+      background-size: cover;
+      background-position: center 30%;
+      animation: heroKenBurns 24s ease-in-out infinite alternate;
+      will-change: transform;
+    }
+    @keyframes heroKenBurns {
+      0%   { transform: scale(1) translate3d(0,0,0); }
+      100% { transform: scale(1.08) translate3d(-1.2%,-1%,0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-bg-photo { animation: none; }
     }
     .hero::before {
       content: '';
-      position: absolute; inset: 0;
+      position: absolute; inset: 0; z-index: 1;
+      background-image:
+        linear-gradient(rgba(12,21,36,0.62), rgba(12,21,36,0.78)),
+        radial-gradient(ellipse 70% 50% at 50% 100%, rgba(60,120,216,0.22) 0%, transparent 100%),
+        radial-gradient(ellipse 30% 25% at 15% 60%, rgba(60,120,216,0.06) 0%, transparent 100%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute; inset: 0; z-index: 1;
       background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
       background-size: 28px 28px;
       pointer-events: none;
     }
+    .hero > *:not(.hero-bg-photo) { position: relative; z-index: 2; }
 
     .hero-badge {
       display: inline-flex; align-items: center; gap: 0.5rem;
@@ -366,9 +424,37 @@
     }
     .footer-right { font-size: 0.78rem; color: rgba(244,238,225,0.3); }
 
+    /* ── REVEAL-ON-SCROLL ─────────────────── */
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.7s cubic-bezier(.2,.8,.2,1), transform 0.7s cubic-bezier(.2,.8,.2,1);
+    }
+    .reveal.is-visible { opacity: 1; transform: translateY(0); }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+    }
+
+    /* ── TRUST STRIP ──────────────────────── */
+    .trust-strip {
+      display: flex; align-items: center; justify-content: center;
+      gap: 2.5rem; flex-wrap: wrap;
+      padding: 1.5rem 5%; background: var(--white);
+      border-bottom: 1px solid var(--border);
+    }
+    .trust-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.8rem; font-weight: 600; color: var(--muted);
+    }
+    .trust-item svg { color: var(--blue); flex-shrink: 0; }
+
+    /* ── ACTIVE NAV LINK ──────────────────── */
+    nav ul a.active, .mobile-nav ul a.active { color: var(--navy); }
+
     /* ── RESPONSIVE ───────────────────────── */
     @media (max-width: 700px) {
       nav ul { display: none; }
+      .nav-actions { display: none; }
+      .nav-toggle { display: flex; }
       .features-grid { grid-template-columns: 1fr 1fr; }
       .feature-card { border-right: none; border-bottom: 1px solid #DDE1EA; }
       .feature-card:nth-child(odd) { border-right: 1px solid #DDE1EA; }
@@ -406,10 +492,28 @@
     <a href="app.html" class="nav-login">Logga in</a>
     <a href="#kontakt" class="nav-cta">Ansök till beta</a>
   </div>
+
+  <button class="nav-toggle" id="navToggle" type="button" aria-label="Öppna meny" aria-expanded="false" aria-controls="mobileNav">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <ul>
+    <li><a href="#losning">Lösning</a></li>
+    <li><a href="#sa-funkar-det">Så funkar det</a></li>
+    <li><a href="#priser">Priser</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <div class="mobile-nav-actions">
+    <a href="app.html" class="nav-login">Logga in</a>
+    <a href="#kontakt" class="nav-cta">Ansök till beta</a>
+  </div>
+</div>
 
 <!-- HERO -->
 <section class="hero">
+  <div class="hero-bg-photo" aria-hidden="true"></div>
   <div class="hero-badge">
     <span class="hero-badge-dot"></span>
     Beta öppen — vi tar in testklubbar nu
@@ -434,8 +538,24 @@
   </div>
 </section>
 
+<!-- TRUST STRIP -->
+<div class="trust-strip">
+  <div class="trust-item">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+    GDPR som grundkrav
+  </div>
+  <div class="trust-item">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7v10M4 7l8-4 8 4M4 7l8 4m8-4v10M20 7l-8 4m0 0v10"/></svg>
+    Integrerar med SportAdmin & IdrottOnline
+  </div>
+  <div class="trust-item">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Byggt för svenska föreningar
+  </div>
+</div>
+
 <!-- SOLUTION / FEATURES -->
-<section class="section alt" id="losning">
+<section class="section alt reveal" id="losning">
   <p class="eyebrow">Lösningen</p>
   <h2>En AI-administratör för hela klubben</h2>
   <p class="sub">Kanslio hanterar kommunikation, scheman och adminflöden — där timmarna faktiskt försvinner.</p>
@@ -469,7 +589,7 @@
 </section>
 
 <!-- HOW IT WORKS -->
-<section class="section alt" id="sa-funkar-det">
+<section class="section alt reveal" id="sa-funkar-det">
   <p class="eyebrow">Så funkar det</p>
   <h2>Från admin-tungt till admin-lätt</h2>
   <p class="sub">Vi startar smalt, mäter, och bygger ut i er takt.</p>
@@ -494,7 +614,7 @@
 </section>
 
 <!-- PRICING -->
-<section class="section alt" id="priser">
+<section class="section alt reveal" id="priser">
   <p class="eyebrow">Priser</p>
   <h2>Enkel prissättning</h2>
   <p class="sub">Under beta är det gratis. Efteråt väljer ni rätt plan — inga dolda avgifter.</p>
@@ -532,7 +652,7 @@
 </section>
 
 <!-- FAQ -->
-<section class="section alt" id="faq">
+<section class="section alt reveal" id="faq">
   <p class="eyebrow">Vanliga frågor</p>
   <h2>Korta svar</h2>
 
@@ -557,7 +677,7 @@
 </section>
 
 <!-- FORM -->
-<section class="section alt" id="kontakt">
+<section class="section alt reveal" id="kontakt">
   <p class="eyebrow">Ansök</p>
   <h2>Bli betaklubb</h2>
   <p class="sub" style="margin-bottom:2.25rem">Vi hör av oss inom 2 arbetsdagar för att boka ett kort samtal.</p>
@@ -635,6 +755,61 @@ function handleSubmit(e) {
   btn.textContent = '✓ Ansökan skickad!';
   btn.style.background = '#2d66c4';
   btn.disabled = true;
+}
+
+// ---- Mobile menu ----
+const navToggle = document.getElementById('navToggle');
+const mobileNav = document.getElementById('mobileNav');
+function closeMobileNav() {
+  mobileNav.classList.remove('show');
+  navToggle.classList.remove('open');
+  navToggle.setAttribute('aria-expanded', 'false');
+  setTimeout(() => { if (!navToggle.classList.contains('open')) mobileNav.classList.remove('open'); }, 200);
+}
+function openMobileNav() {
+  mobileNav.classList.add('open');
+  navToggle.setAttribute('aria-expanded', 'true');
+  navToggle.classList.add('open');
+  requestAnimationFrame(() => mobileNav.classList.add('show'));
+}
+navToggle.addEventListener('click', () => {
+  navToggle.classList.contains('open') ? closeMobileNav() : openMobileNav();
+});
+mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMobileNav));
+
+// ---- Reveal-on-scroll ----
+const revealEls = document.querySelectorAll('.reveal');
+if ('IntersectionObserver' in window && revealEls.length) {
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  revealEls.forEach(el => revealObserver.observe(el));
+  // Failsafe: force-reveal anything not caught (older browsers, odd layouts)
+  setTimeout(() => revealEls.forEach(el => el.classList.add('is-visible')), 2500);
+} else {
+  revealEls.forEach(el => el.classList.add('is-visible'));
+}
+
+// ---- Active nav link on scroll ----
+const sectionIds = ['losning', 'sa-funkar-det', 'priser', 'faq', 'kontakt'];
+const navLinks = document.querySelectorAll('nav ul a, .mobile-nav ul a');
+if ('IntersectionObserver' in window) {
+  const activeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id));
+      }
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' });
+  sectionIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) activeObserver.observe(el);
+  });
 }
 </script>
 <script>
