@@ -213,10 +213,15 @@
       color: rgba(60,120,216,0.55);
       margin-top: 2rem; margin-bottom: 0.4rem; position: relative;
     }
-    .hero-note {
-      font-size: 0.75rem; color: rgba(244,238,225,0.35);
-      margin-top: 0; position: relative;
+    .hero-trust {
+      display: flex; align-items: center; justify-content: center;
+      gap: 1.5rem; flex-wrap: wrap; position: relative;
     }
+    .hero-trust-item {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.78rem; color: rgba(244,238,225,0.5);
+    }
+    .hero-trust-item svg { color: var(--blue); flex-shrink: 0; }
     .scroll-cue {
       position: fixed;
       bottom: 2rem; left: 50%;
@@ -284,9 +289,16 @@
       margin: 0 auto 1.5rem;
       color: var(--blue);
     }
+    .card-eyebrow {
+      font-size: 0.62rem; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase;
+      color: var(--blue); margin-bottom: 0.5rem;
+    }
     .feature-card h3 {
       font-size: 0.9rem; font-weight: 700;
       color: var(--navy); line-height: 1.5;
+    }
+    .card-desc {
+      font-size: 0.82rem; color: var(--muted); margin-top: 0.6rem; line-height: 1.65;
     }
 
     /* ── STEPS ────────────────────────────── */
@@ -528,8 +540,12 @@
     <a href="#losning" class="btn-ghost">Se hur det funkar</a>
   </div>
 
+  <div class="hero-trust">
+    <span class="hero-trust-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Kom igång på 30 minuter</span>
+    <span class="hero-trust-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Ingen bindningstid</span>
+  </div>
+
   <div class="hero-tagline">Home of Sports</div>
-  <p class="hero-note">Kom igång på 30 minuter &nbsp;·&nbsp; Ingen bindningstid</p>
 
   <div class="scroll-cue" aria-hidden="true">
     <svg width="20" height="26" viewBox="0 0 20 26" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -565,25 +581,33 @@
       <div class="feat-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       </div>
+      <p class="card-eyebrow">Kommunikation</p>
       <h3>Automatiserad kommunikation</h3>
+      <p class="card-desc">Mejl och kallelser skrivs och skickas åt kansliet, inte av det.</p>
     </div>
     <div class="feature-card">
       <div class="feat-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
       </div>
+      <p class="card-eyebrow">Schema</p>
       <h3>Scheman & kallelser</h3>
+      <p class="card-desc">Träningstider och matcher hålls uppdaterade utan manuellt krångel.</p>
     </div>
     <div class="feature-card">
       <div class="feat-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
       </div>
+      <p class="card-eyebrow">Styrelse</p>
       <h3>Överblick för styrelse</h3>
+      <p class="card-desc">Rapporter som visar svart på vitt var tiden faktiskt går.</p>
     </div>
     <div class="feature-card">
       <div class="feat-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       </div>
+      <p class="card-eyebrow">Sverige</p>
       <h3>Byggt för svenska föreningar</h3>
+      <p class="card-desc">Anpassat efter hur svenska idrottsklubbar faktiskt jobbar.</p>
     </div>
   </div>
 </section>
