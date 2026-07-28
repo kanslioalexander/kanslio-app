@@ -1701,6 +1701,18 @@
   .progress-nudge b { color: var(--ink); font-weight: 700; }
   .progress-nudge svg { flex-shrink: 0; color: var(--accent-strong); }
 
+  /* ---- 15. Outlook-kopplingen ---- */
+  .outlook-slot { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .outlook-slot .btn-ghost { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+  .mail-source.outlook-live {
+    background: var(--good-soft); border-color: transparent; color: var(--good-ink);
+  }
+  .mail-outlook-status {
+    display: none; margin-top: 10px; font-size: 12.5px; font-weight: 600; line-height: 1.45;
+  }
+  .mail-outlook-status.ok { display: block; color: var(--good-ink); }
+  .mail-outlook-status.err { display: block; color: var(--warn-ink); }
+
   @media (prefers-reduced-motion: reduce) {
     .progress-fill::after { animation: none; }
     body { background-attachment: scroll; }
@@ -2034,10 +2046,12 @@
           <h2 id="mailHeroTitle">I natt skrev Kanslio utkast åt dig</h2>
           <p>Sorterat efter vad som är viktigast — granska, redigera och skicka direkt härifrån.</p>
         </div>
-        <span class="mail-source">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 7l9 6 9-6"/></svg>
-          Kopplat till Outlook
-        </span>
+        <div class="outlook-slot" id="outlookSlot">
+          <span class="mail-source">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 7l9 6 9-6"/></svg>
+            Demodata
+          </span>
+        </div>
       </div>
 
       <div class="section-rule reveal">
@@ -3410,6 +3424,18 @@
     return `style="transition-delay:${Math.min(idx, 8) * 45}ms"`;
   }
 
+  // Allt som kommer utifrån (avsändare, ämnen i riktiga mejl) måste escapas innan
+  // det stoppas in i innerHTML. Ett ämne som "<img src=x onerror=...>" ska visas
+  // som text, inte köras. Se SECURITY.md regel 14 — inkommande innehåll är otrott.
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function emptyStateHTML(iconSvg, title, sub) {
     return `<div class="empty-state reveal">
       <div class="empty-state-icon">${iconSvg}</div>
@@ -3462,8 +3488,8 @@
       <div class="mail-row reveal" ${revealDelay(i)} data-idx="${i}">
         <div class="mail-row-top">
           <div>
-            <div class="mail-from">${m.sent || m.outgoing ? `Till: ${m.to}` : m.from}</div>
-            <div class="mail-subject">${m.subject}</div>
+            <div class="mail-from">${m.sent || m.outgoing ? `Till: ${escapeHtml(m.to)}` : escapeHtml(m.from)}</div>
+            <div class="mail-subject">${escapeHtml(m.subject)}</div>
           </div>
           ${m.sent
             ? `<span class="status-chip status-klar"><span class="dot"></span>Skickat</span>`
@@ -3472,12 +3498,17 @@
           <svg class="mail-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
         </div>
         <div class="mail-detail">
-          <div class="detail-label">${m.sent ? 'Skickat av dig' : 'AI-utkast, redo att granska'}</div>
+          <div class="detail-label">${m.sent ? 'Skickat av dig' : m.graphId ? 'Riktigt mejl ur din inkorg' : 'AI-utkast, redo att granska'}</div>
           <span class="mail-draft-text"></span>
-          ${m.sent ? '' : `<div class="detail-actions">
-            <button class="btn-primary" type="button">Skicka</button>
-            <button class="btn-ghost" type="button">Redigera</button>
-          </div>`}
+          ${m.sent ? '' : m.graphId
+            ? `<div class="detail-actions">
+                 <button class="btn-primary mail-outlook-draft" type="button">Skapa svarsutkast i Outlook</button>
+               </div>
+               <div class="mail-outlook-status"></div>`
+            : `<div class="detail-actions">
+                 <button class="btn-primary" type="button">Skicka</button>
+                 <button class="btn-ghost" type="button">Redigera</button>
+               </div>`}
         </div>
       </div>`).join('');
 
@@ -3491,12 +3522,20 @@
           typewrite(row.querySelector('.mail-draft-text'), m.sent ? m.body : m.draft);
         }
       });
-      const sendBtn = row.querySelector('.detail-actions .btn-primary');
-      if (sendBtn) {
-        sendBtn.addEventListener('click', (e) => {
+      const outlookBtn = row.querySelector('.mail-outlook-draft');
+      if (outlookBtn) {
+        outlookBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          sendMailDraft(idx);
+          OUTLOOK.createDraft(m, outlookBtn, row.querySelector('.mail-outlook-status'));
         });
+      } else {
+        const sendBtn = row.querySelector('.detail-actions .btn-primary');
+        if (sendBtn) {
+          sendBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sendMailDraft(idx);
+          });
+        }
       }
     });
 
@@ -3511,6 +3550,126 @@
     document.getElementById('mailNavBadge').textContent = pendingCount;
     observeReveals();
   }
+
+  /* ==========================================================================
+     OUTLOOK-INTEGRATION (test)
+     Pratar med den lokala backenden (kanslio-backend), aldrig med Microsoft
+     direkt: appen ska aldrig se ett access token (SECURITY.md regel 22).
+     Backenden har bara Mail.ReadWrite — den kan läsa och lägga utkast, men
+     saknar Mail.Send och kan därför fysiskt inte skicka något (regel 15).
+     ========================================================================== */
+  const MAIL_ICON_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 7l9 6 9-6"/></svg>';
+
+  const OUTLOOK = (() => {
+    // Kör bara mot backenden när appen serveras lokalt. På GitHub Pages finns
+    // ingen localhost:8788, och då ska appen tyst stanna i demoläge.
+    const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
+    const BASE = 'http://localhost:8788';
+    let account = null;
+
+    async function api(path, options = {}) {
+      const res = await fetch(BASE + path, {
+        ...options,
+        credentials: 'include', // sessionscookien är HttpOnly och sätts av backenden
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+      return body;
+    }
+
+    function renderSlot() {
+      const slot = document.getElementById('outlookSlot');
+      if (!slot) return;
+
+      if (!isLocal) {
+        slot.innerHTML = `<span class="mail-source">${MAIL_ICON_SVG}Demodata</span>`;
+        return;
+      }
+      if (!account) {
+        slot.innerHTML = `<button class="btn-ghost" type="button" id="outlookConnect">${MAIL_ICON_SVG}Koppla Outlook</button>`;
+        document.getElementById('outlookConnect').addEventListener('click', connect);
+        return;
+      }
+      slot.innerHTML = `
+        <span class="mail-source outlook-live">${MAIL_ICON_SVG}${escapeHtml(account.email)}</span>
+        <button class="link" type="button" id="outlookDisconnect">Koppla från</button>`;
+      document.getElementById('outlookDisconnect').addEventListener('click', disconnect);
+    }
+
+    function connect() {
+      // Full omdirigering till Microsoft — inget popup-fönster, inga
+      // inloggningsuppgifter passerar genom appen.
+      window.location.href = `${BASE}/auth/start`;
+    }
+
+    async function disconnect() {
+      try { await api('/api/disconnect', { method: 'POST' }); } catch { /* redan borta */ }
+      account = null;
+      renderSlot();
+      location.reload();
+    }
+
+    /** Byter ut demomejlen mot de riktiga i inkorgen. */
+    async function loadMail() {
+      const { mail } = await api('/api/mail');
+      MAIL.length = 0;
+      mail.forEach(m => MAIL.push({
+        graphId: m.graphId,
+        from: m.from,
+        fromAddress: m.fromAddress,
+        subject: m.subject,
+        priority: m.priority,
+        time: m.time,
+        // Vid expandering visas mejlets egen text; utkastet skrivs först när
+        // man ber om det, så vi inte gissar svar på allt i inkorgen.
+        draft: m.preview || '(tomt meddelande)',
+      }));
+      renderMail();
+      renderTodoSummary();
+    }
+
+    async function createDraft(message, button, statusEl) {
+      const original = button.textContent;
+      button.disabled = true;
+      button.textContent = 'Skriver utkast…';
+      statusEl.textContent = '';
+      statusEl.className = 'mail-outlook-status';
+
+      try {
+        const result = await api('/api/mail/draft', {
+          method: 'POST',
+          body: JSON.stringify({ messageId: message.graphId }),
+        });
+        statusEl.className = 'mail-outlook-status ok';
+        statusEl.textContent = 'Utkastet ligger nu i din Outlook — granska och skicka därifrån.';
+        button.textContent = 'Utkast skapat';
+        if (result.preview) message.draft = result.preview;
+      } catch (e) {
+        statusEl.className = 'mail-outlook-status err';
+        statusEl.textContent = e.message === 'inte_kopplad'
+          ? 'Kopplingen har gått ut — koppla Outlook igen.'
+          : 'Kunde inte skapa utkastet. Kolla att backenden kör.';
+        button.disabled = false;
+        button.textContent = original;
+      }
+    }
+
+    async function init() {
+      if (!isLocal) return renderSlot();
+      try {
+        const status = await api('/api/status');
+        account = status.account;
+        renderSlot();
+        if (status.connected) await loadMail();
+      } catch {
+        // Backenden är inte igång — appen fortsätter i demoläge utan att gnälla.
+        renderSlot();
+      }
+    }
+
+    return { init, createDraft };
+  })();
 
   function sendMailDraft(idx) {
     const m = MAIL[idx];
@@ -6274,6 +6433,7 @@ ${sectionsHtml}
   safe(initCommandPalette);
   safe(initScrollChrome);
   safe(observeReveals);
+  safe(() => OUTLOOK.init());
 })();
 </script>
 <script>
