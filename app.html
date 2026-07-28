@@ -1708,10 +1708,46 @@
     background: var(--good-soft); border-color: transparent; color: var(--good-ink);
   }
   .mail-outlook-status {
-    display: none; margin-top: 10px; font-size: 12.5px; font-weight: 600; line-height: 1.45;
+    margin-top: 10px; font-size: 12.5px; font-weight: 600; line-height: 1.45;
+    color: var(--ink-muted);
   }
-  .mail-outlook-status.ok { display: block; color: var(--good-ink); }
-  .mail-outlook-status.err { display: block; color: var(--warn-ink); }
+  .mail-outlook-status:empty { display: none; }
+  .mail-outlook-status.ok { color: var(--good-ink); }
+  .mail-outlook-status.err { color: var(--warn-ink); }
+
+  /* Svarsredigeraren — hela flödet ska gå att sköta här, utan att öppna Outlook */
+  .mail-reply { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .mail-reply-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap; margin-bottom: 8px;
+  }
+  .mail-reply-head .detail-label { margin-bottom: 0; }
+  .mail-reply-source { font-size: 11.5px; font-weight: 600; color: var(--ink-muted); }
+  .mail-reply-loading {
+    font-size: 13px; font-weight: 600; color: var(--accent-strong);
+    padding: 10px 0; display: flex; align-items: center; gap: 9px;
+  }
+  .mail-reply-loading::before {
+    content: ''; width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid var(--accent-soft-strong); border-top-color: var(--accent);
+    animation: spin-slow .7s linear infinite;
+  }
+  .mail-reply-text {
+    width: 100%; resize: vertical; min-height: 170px;
+    border: 1px solid var(--border); border-radius: var(--r-sm);
+    background: var(--surface); color: var(--ink);
+    padding: 13px 15px; font: inherit; font-size: 13.5px; line-height: 1.6;
+    outline: none; transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .mail-reply-text:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring); }
+  .mail-reply-actions { margin-top: 12px; }
+  .btn-primary.btn-confirm {
+    background-image: linear-gradient(180deg, color-mix(in srgb, var(--warn) 88%, #FFF), var(--warn));
+    color: #FFF;
+  }
+  .btn-primary.btn-confirm:hover {
+    background-image: linear-gradient(180deg, var(--warn), var(--warn));
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .progress-fill::after { animation: none; }
@@ -3501,10 +3537,20 @@
           <div class="detail-label">${m.sent ? 'Skickat av dig' : m.graphId ? 'Riktigt mejl ur din inkorg' : 'AI-utkast, redo att granska'}</div>
           <span class="mail-draft-text"></span>
           ${m.sent ? '' : m.graphId
-            ? `<div class="detail-actions">
-                 <button class="btn-primary mail-outlook-draft" type="button">Skapa svarsutkast i Outlook</button>
-               </div>
-               <div class="mail-outlook-status"></div>`
+            ? `<div class="mail-reply">
+                 <div class="mail-reply-head">
+                   <span class="detail-label">Kanslios svarsförslag</span>
+                   <span class="mail-reply-source"></span>
+                 </div>
+                 <div class="mail-reply-loading">Kanslio skriver ett svar åt dig…</div>
+                 <textarea class="mail-reply-text" rows="9" hidden
+                   aria-label="Svarsutkast — redigera fritt innan du skickar"></textarea>
+                 <div class="detail-actions mail-reply-actions" hidden>
+                   <button class="btn-primary mail-reply-send" type="button">Skicka svar</button>
+                   <button class="btn-ghost mail-reply-save" type="button">Spara utkast</button>
+                 </div>
+                 <div class="mail-outlook-status"></div>
+               </div>`
             : `<div class="detail-actions">
                  <button class="btn-primary" type="button">Skicka</button>
                  <button class="btn-ghost" type="button">Redigera</button>
@@ -3520,14 +3566,22 @@
         if (row.classList.contains('open') && !row.dataset.typed) {
           row.dataset.typed = '1';
           typewrite(row.querySelector('.mail-draft-text'), m.sent ? m.body : m.draft);
+          // Riktigt mejl: be Kanslio skriva svaret direkt när man öppnar det,
+          // så utkastet är på plats utan att man behöver be om det.
+          if (m.graphId) OUTLOOK.prepareReply(m, row);
         }
       });
-      const outlookBtn = row.querySelector('.mail-outlook-draft');
-      if (outlookBtn) {
-        outlookBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          OUTLOOK.createDraft(m, outlookBtn, row.querySelector('.mail-outlook-status'));
+
+      if (m.graphId && !m.sent) {
+        row.querySelectorAll('.mail-reply-actions button').forEach(btn => {
+          btn.addEventListener('click', (e) => e.stopPropagation());
         });
+        row.querySelector('.mail-reply-text')
+          ?.addEventListener('click', (e) => e.stopPropagation());
+        row.querySelector('.mail-reply-save')
+          ?.addEventListener('click', () => OUTLOOK.saveReply(m, row));
+        row.querySelector('.mail-reply-send')
+          ?.addEventListener('click', () => OUTLOOK.sendReply(m, row, idx));
       } else {
         const sendBtn = row.querySelector('.detail-actions .btn-primary');
         if (sendBtn) {
@@ -3629,29 +3683,128 @@
       renderTodoSummary();
     }
 
-    async function createDraft(message, button, statusEl) {
-      const original = button.textContent;
-      button.disabled = true;
-      button.textContent = 'Skriver utkast…';
-      statusEl.textContent = '';
-      statusEl.className = 'mail-outlook-status';
+    function setStatus(row, kind, text) {
+      const el = row.querySelector('.mail-outlook-status');
+      if (!el) return;
+      el.className = `mail-outlook-status${kind ? ' ' + kind : ''}`;
+      el.textContent = text || '';
+    }
+
+    function friendlyError(e, fallback) {
+      if (e.message === 'inte_kopplad') return 'Kopplingen har gått ut — koppla Outlook igen.';
+      if (e.message === 'for_manga_anrop') return 'För många anrop just nu. Vänta en stund.';
+      if (e.message === 'tomt_mejl') return 'Skriv något innan du skickar.';
+      return fallback;
+    }
+
+    /**
+     * Ber backenden skriva ett svar och lägga det som utkast i Outlook.
+     * Körs en gång per mejl, när man öppnar det.
+     */
+    async function prepareReply(message, row) {
+      if (message._replyRequested) return;
+      message._replyRequested = true;
+
+      const loading = row.querySelector('.mail-reply-loading');
+      const textarea = row.querySelector('.mail-reply-text');
+      const actions = row.querySelector('.mail-reply-actions');
+      const sourceEl = row.querySelector('.mail-reply-source');
 
       try {
         const result = await api('/api/mail/draft', {
           method: 'POST',
           body: JSON.stringify({ messageId: message.graphId }),
         });
-        statusEl.className = 'mail-outlook-status ok';
-        statusEl.textContent = 'Utkastet ligger nu i din Outlook — granska och skicka därifrån.';
-        button.textContent = 'Utkast skapat';
-        if (result.preview) message.draft = result.preview;
+
+        message.draftId = result.draftId;
+        message.replyText = result.text;
+
+        loading.hidden = true;
+        textarea.value = result.text;
+        textarea.hidden = false;
+        actions.hidden = false;
+        // Var ärlig om utkastet inte kom från modellen.
+        sourceEl.textContent = result.source === 'claude'
+          ? 'Skrivet av Kanslio · redigera fritt'
+          : 'Mall — ingen AI-nyckel satt · redigera fritt';
+        setStatus(row, '', 'Utkastet ligger redan i Outlook. Ändringar du gör här sparas dit.');
       } catch (e) {
-        statusEl.className = 'mail-outlook-status err';
-        statusEl.textContent = e.message === 'inte_kopplad'
-          ? 'Kopplingen har gått ut — koppla Outlook igen.'
-          : 'Kunde inte skapa utkastet. Kolla att backenden kör.';
-        button.disabled = false;
-        button.textContent = original;
+        message._replyRequested = false;
+        loading.hidden = true;
+        setStatus(row, 'err', friendlyError(e, 'Kunde inte skriva utkastet. Kolla att backenden kör.'));
+      }
+    }
+
+    async function saveReply(message, row) {
+      const textarea = row.querySelector('.mail-reply-text');
+      const btn = row.querySelector('.mail-reply-save');
+      if (!message.draftId) return;
+
+      btn.disabled = true;
+      const original = btn.textContent;
+      btn.textContent = 'Sparar…';
+      try {
+        await api('/api/draft/save', {
+          method: 'POST',
+          body: JSON.stringify({ draftId: message.draftId, text: textarea.value }),
+        });
+        message.replyText = textarea.value;
+        setStatus(row, 'ok', 'Sparat i Outlook.');
+      } catch (e) {
+        setStatus(row, 'err', friendlyError(e, 'Kunde inte spara.'));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    }
+
+    /**
+     * Skickar svaret. Två klick krävs — att skicka mejl är oåterkalleligt, och
+     * detta är det enda stället där något lämnar brevlådan (SECURITY.md regel
+     * 13 och 15: människan skickar, aldrig AI:n).
+     */
+    async function sendReply(message, row, idx) {
+      const textarea = row.querySelector('.mail-reply-text');
+      const btn = row.querySelector('.mail-reply-send');
+      if (!message.draftId) return;
+
+      if (btn.dataset.armed !== '1') {
+        btn.dataset.armed = '1';
+        btn.textContent = 'Bekräfta — skicka på riktigt';
+        btn.classList.add('btn-confirm');
+        setStatus(row, '', `Skickas till ${message.fromAddress || message.from}. Klicka igen för att bekräfta.`);
+        clearTimeout(btn._disarm);
+        btn._disarm = setTimeout(() => {
+          btn.dataset.armed = '0';
+          btn.textContent = 'Skicka svar';
+          btn.classList.remove('btn-confirm');
+          setStatus(row, '', '');
+        }, 8000);
+        return;
+      }
+
+      clearTimeout(btn._disarm);
+      btn.disabled = true;
+      btn.textContent = 'Skickar…';
+      try {
+        await api('/api/draft/send', {
+          method: 'POST',
+          body: JSON.stringify({ draftId: message.draftId, text: textarea.value }),
+        });
+        // Markera som skickat i appen så listan och dagens uppdrag följer med.
+        message.sent = true;
+        message.to = message.from;
+        message.body = textarea.value;
+        message.time = new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+        renderMail();
+        renderTodoSummary();
+        renderProgress();
+      } catch (e) {
+        btn.disabled = false;
+        btn.dataset.armed = '0';
+        btn.textContent = 'Skicka svar';
+        btn.classList.remove('btn-confirm');
+        setStatus(row, 'err', friendlyError(e, 'Kunde inte skicka.'));
       }
     }
 
@@ -3668,7 +3821,7 @@
       }
     }
 
-    return { init, createDraft };
+    return { init, prepareReply, saveReply, sendReply };
   })();
 
   function sendMailDraft(idx) {
