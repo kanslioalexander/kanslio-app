@@ -3,7 +3,7 @@
   "short_name": "Kanslio",
   "description": "AI-assistent för sportföreningars kansli",
   "display": "standalone",
-  "start_url": "./index.html",
+  "start_url": "./app.html",
   "scope": "./",
   "background_color": "#F7F1E3",
   "theme_color": "#2453EB",
