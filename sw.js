@@ -1,5 +1,5 @@
-const CACHE_NAME = 'kanslio-v2';
-const APP_SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
+const CACHE_NAME = 'kanslio-v3';
+const APP_SHELL = ['./', './index.html', './app.html', './manifest.json', './icon-192.png', './icon-512.png', './favicon.png', './hero-bg.jpg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
