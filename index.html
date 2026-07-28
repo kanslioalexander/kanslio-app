@@ -46,6 +46,13 @@
     --r-md: 20px;
     --r-sm: 14px;
     --r-pill: 999px;
+    /* Premium-lagret: hårfina linjer, fokusglöd och rörelsekurvor */
+    --hairline: #F0E9D8;
+    --ring: rgba(36,83,235,.16);
+    --glow: rgba(36,83,235,.28);
+    --sheen: rgba(255,255,255,.75);
+    --ease-out: cubic-bezier(.22,1,.36,1);
+    --ease-spring: cubic-bezier(.34,1.42,.5,1);
   }
   @media (prefers-color-scheme: dark) {
     :root:where(:not([data-theme="light"])) {
@@ -76,6 +83,10 @@
       --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
       --shadow-md: 0 10px 28px rgba(0,0,0,.35);
       --shadow-lg: 0 20px 50px rgba(0,0,0,.5);
+      --hairline: rgba(244,241,231,.055);
+      --ring: rgba(91,140,255,.24);
+      --glow: rgba(91,140,255,.34);
+      --sheen: rgba(255,255,255,.06);
     }
   }
   :root[data-theme="dark"] {
@@ -106,6 +117,10 @@
     --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
     --shadow-md: 0 10px 28px rgba(0,0,0,.35);
     --shadow-lg: 0 20px 50px rgba(0,0,0,.5);
+    --hairline: rgba(244,241,231,.055);
+    --ring: rgba(91,140,255,.24);
+    --glow: rgba(91,140,255,.34);
+    --sheen: rgba(255,255,255,.06);
   }
   :root[data-theme="light"] {
     color-scheme: light;
@@ -117,6 +132,8 @@
     --neutral-dot: #98A2B8; --neutral-ink: #5A6478; --neutral-soft: #EEF0F4;
     --shadow-sm: 0 1px 2px rgba(22,34,62,.05); --shadow-md: 0 10px 28px rgba(22,34,62,.08);
     --shadow-lg: 0 18px 44px rgba(22,34,62,.14);
+    --hairline: #F0E9D8; --ring: rgba(36,83,235,.16); --glow: rgba(36,83,235,.28);
+    --sheen: rgba(255,255,255,.75);
   }
 
   * { box-sizing: border-box; }
@@ -1431,6 +1448,262 @@
     .team-meta, .facility-row input { text-align: left; }
     .schedule-toolbar { flex-direction: column; align-items: stretch; }
   }
+
+  /* ==========================================================================
+     PREMIUM-LAGRET
+     Ligger sist i stylesheeten med flit: allt härunder förfinar det som redan
+     definierats ovan (ljus, hårlinjer, rörelse, tryckkänsla) utan att skriva om
+     det. Vill man backa hela polishen räcker det att ta bort detta block.
+     ========================================================================== */
+
+  /* ---- 1. Atmosfär: bakgrunden ska ha ljus i sig, inte vara platt papper ---- */
+  body {
+    background-image:
+      radial-gradient(115% 70% at 8% -12%, color-mix(in srgb, var(--surface) 65%, transparent), transparent 58%),
+      radial-gradient(80% 55% at 102% -4%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 52%);
+    background-attachment: fixed;
+  }
+  .sidebar {
+    background-image: linear-gradient(180deg, color-mix(in srgb, var(--surface) 60%, transparent), transparent 240px);
+  }
+
+  /* ---- 2. Rullningslister: smala och i temat ---- */
+  * { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong); border-radius: var(--r-pill);
+    border: 3px solid transparent; background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--ink-muted); background-clip: content-box; }
+
+  /* ---- 3. Typografi: stramare rubriker, siffror i tabellsiffror ---- */
+  h1, h2 { letter-spacing: -0.022em; }
+  .page-head h1 { font-size: 32px; letter-spacing: -0.03em; }
+  .page-head .sub, .todo-sub, .empty-state-sub, .progress-sub { text-wrap: pretty; }
+  .stat-value, .time-teaser-value, .time-hero-value, .progress-percent-value,
+  .plan-seats-value, .settings-stat strong, .day-head .num {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.032em;
+  }
+
+  /* ---- 4. "Strecket": sektionsrubrik som delar upp en sida i kapitel ----
+     Ger ögat vilopunkter och gör långa vyer skannbara på ett ögonkast. */
+  .section-rule { display: flex; align-items: center; gap: 14px; margin: 12px 2px -8px; }
+  .section-rule-label {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .09em;
+    color: var(--ink-muted); white-space: nowrap;
+  }
+  .section-rule-label::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); opacity: .5; flex-shrink: 0;
+  }
+  .section-rule-line {
+    flex: 1; min-width: 20px; height: 1px;
+    background: linear-gradient(90deg, var(--border-strong), var(--hairline) 45%, transparent);
+  }
+  .section-rule-meta { font-size: 12px; font-weight: 600; color: var(--ink-muted); white-space: nowrap; }
+
+  /* ---- 5. Hårfina linjer inuti listor: struktur utan tunga ramar ---- */
+  .agenda-item + .agenda-item,
+  .activity-item + .activity-item,
+  .info-row + .info-row { border-top: 1px solid var(--hairline); }
+  .mission-row + .mission-row::after {
+    content: ''; position: absolute; left: 8px; right: 8px; top: 0; height: 1px;
+    background: var(--hairline);
+  }
+  /* Långa listor: en indragen hårlinje mellan raderna gör dem lätta att följa
+     i sidled utan att listan ser ut som en tabell med ramar. */
+  .mail-row + .mail-row::after,
+  .invoice-item + .invoice-item::after,
+  .case-row + .case-row::after,
+  .full-row + .full-row::after,
+  .team-row + .team-row::after {
+    content: ''; position: absolute; left: 14px; right: 14px; top: 0; height: 1px;
+    background: var(--hairline); pointer-events: none;
+  }
+
+  /* ---- 6. Accentstrecket: markerar raden man har under muspekaren ---- */
+  .case-row, .mail-row, .invoice-item, .full-row, .team-row,
+  .saved-protocol-row, .mission-row, .todo-row { position: relative; }
+  .case-row::before, .mail-row::before, .invoice-item::before, .full-row::before,
+  .team-row::before, .saved-protocol-row::before, .mission-row::before {
+    content: ''; position: absolute; left: 0; top: 12%; bottom: 12%; width: 3px;
+    border-radius: var(--r-pill); background: var(--accent);
+    transform: scaleY(.3); opacity: 0; pointer-events: none;
+    transition: transform .24s var(--ease-out), opacity .24s var(--ease-out);
+  }
+  .case-row:hover::before, .mail-row:hover::before, .invoice-item:hover::before,
+  .full-row:hover::before, .team-row:hover::before, .saved-protocol-row:hover::before,
+  .mission-row:hover::before,
+  .case-row:focus-visible::before, .mail-row:focus-visible::before,
+  .invoice-item:focus-visible::before, .team-row:focus-visible::before {
+    transform: scaleY(1); opacity: 1;
+  }
+
+  /* Sidomenyn: ett streck i kanten talar om var man står */
+  .nav-item { position: relative; }
+  .nav-item::before {
+    content: ''; position: absolute; left: -14px; top: 50%; width: 3px; height: 0;
+    border-radius: 0 var(--r-pill) var(--r-pill) 0; background: var(--accent);
+    transform: translateY(-50%); transition: height .28s var(--ease-spring);
+  }
+  .nav-item.active::before { height: 24px; box-shadow: 0 0 12px -2px var(--glow); }
+  .sidebar.collapsed .nav-item::before { left: -10px; }
+  .nav-icon { transition: background .15s ease, color .15s ease, transform .22s var(--ease-spring); }
+  .nav-item:hover .nav-icon { transform: translateY(-1px) scale(1.06); }
+
+  /* ---- 7. Kort: mjukt djup i stället för platt vit ruta ---- */
+  .card {
+    position: relative;
+    box-shadow: var(--shadow-sm), inset 0 1px 0 var(--sheen);
+    transition: box-shadow .28s var(--ease-out), border-color .28s var(--ease-out), transform .28s var(--ease-out);
+  }
+  .stat-card:hover, .stat-card.linkable:hover {
+    box-shadow: var(--shadow-md), inset 0 1px 0 var(--sheen);
+    transform: translateY(-3px);
+  }
+  /* Tunn accentlinje som tänds längs kortets överkant vid hover */
+  .stat-card.linkable::after {
+    content: ''; position: absolute; left: 22px; right: 22px; top: 0; height: 2px;
+    border-radius: var(--r-pill); pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0; transition: opacity .28s var(--ease-out);
+  }
+  .stat-card.linkable:hover::after { opacity: .9; }
+
+  /* ---- 8. Knappar: tyngd, glöd och tryckkänsla ---- */
+  .btn-primary {
+    background-image: linear-gradient(180deg, color-mix(in srgb, var(--accent) 86%, #FFF), var(--accent));
+    box-shadow: 0 1px 2px rgba(22,34,62,.12), 0 8px 18px -10px var(--glow);
+    transition: transform .18s var(--ease-out), box-shadow .24s var(--ease-out),
+                background-color .18s ease, filter .18s ease;
+  }
+  .btn-primary:hover {
+    background-image: linear-gradient(180deg, color-mix(in srgb, var(--accent-strong) 86%, #FFF), var(--accent-strong));
+    box-shadow: 0 2px 5px rgba(22,34,62,.14), 0 16px 30px -12px var(--glow);
+    transform: translateY(-1.5px);
+  }
+  .btn-primary:active { transform: translateY(0) scale(.97); box-shadow: 0 1px 2px rgba(22,34,62,.18); }
+  .btn-primary:disabled { background-image: none; box-shadow: none; }
+  .btn-ghost, .pill-filter, .suggestion-chip, .icon-btn, .day-chip, .link, .chat-send {
+    transition: transform .16s var(--ease-out), background .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease;
+  }
+  .btn-ghost:active, .pill-filter:active, .suggestion-chip:active,
+  .icon-btn:active, .day-chip:active, .chat-send:active { transform: scale(.95); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent-strong); box-shadow: 0 4px 12px -8px var(--glow); }
+
+  /* ---- 9. Fokus: mjuk halo i stället för hård kantlinje ---- */
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; box-shadow: 0 0 0 5px var(--ring); }
+  .search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring); }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus,
+  .chat-input-row input:focus, .facility-row input:focus { box-shadow: 0 0 0 4px var(--ring); }
+
+  /* ---- 10. Rörelse: mjukare insvep och en levande framstegsmätare ---- */
+  .reveal { transform: translateY(18px) scale(.995); transition: opacity .6s var(--ease-out), transform .6s var(--ease-out); }
+  .reveal.in-view { transform: none; }
+
+  .progress-ball { z-index: 3; }
+  .progress-fill::after {
+    content: ''; position: absolute; inset: 0; z-index: 1; border-radius: inherit; pointer-events: none;
+    background: linear-gradient(100deg, transparent 22%, rgba(255,255,255,.42) 50%, transparent 78%);
+    background-size: 240% 100%;
+    animation: progress-sheen 3s linear infinite;
+  }
+  @keyframes progress-sheen {
+    from { background-position: 190% 0; }
+    to { background-position: -90% 0; }
+  }
+
+  /* ---- 11. Topbar: vänsterkanten talar om var man är och att AI:n jobbar ---- */
+  .topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .crumb { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; min-width: 0; }
+  .crumb-root { color: var(--ink-muted); font-weight: 600; white-space: nowrap; }
+  .crumb-sep { color: var(--ink-muted); opacity: .5; }
+  .crumb-current {
+    font-weight: 700; color: var(--ink); white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .live-pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12px; font-weight: 700; color: var(--good-ink);
+    background: var(--good-soft); border: 1px solid transparent;
+    padding: 5px 12px 5px 10px; border-radius: var(--r-pill); white-space: nowrap;
+  }
+  .live-pill .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--good); flex-shrink: 0;
+    animation: pulse-good 2.2s ease-out infinite;
+  }
+  @media (max-width: 880px) { .live-pill { display: none; } }
+  @media (max-width: 720px) { .topbar-left { order: -1; width: 100%; } }
+
+  /* ---- 12. Detaljer som gör att helheten känns genomarbetad ---- */
+  .avatar { background-image: linear-gradient(150deg, color-mix(in srgb, var(--accent) 80%, #FFF), var(--accent)); }
+  .avatar.has-logo { background-image: none; }
+  .status-chip, .priority-chip, .delta-chip {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 12%, transparent);
+  }
+  .empty-state-icon { box-shadow: 0 0 0 8px color-mix(in srgb, var(--bg-soft) 55%, transparent); }
+  .mail-hero, .time-hero, .plan-hero {
+    background-image:
+      radial-gradient(120% 130% at 0% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 62%),
+      linear-gradient(135deg, var(--accent-soft), var(--surface));
+  }
+  .table-head, .invoice-head { border-bottom-color: var(--border-strong); }
+  .card-head h2 { display: inline-flex; align-items: center; gap: 9px; }
+  .chat-launcher { box-shadow: var(--shadow-lg), 0 12px 28px -10px var(--glow); }
+  .modal-overlay { backdrop-filter: blur(6px); }
+
+  /* ---- 13. "Viktigast idag": sidans handlingszon ----
+     Rangsiffran gör listan till en färdig plan i stället för tre likvärdiga val
+     — mindre att väga mellan, snabbare att komma igång. Det lodräta strecket
+     skiljer prioritet från innehåll utan att lägga till en ram. */
+  .todo-card {
+    border-color: var(--accent-soft-strong);
+    background-image: radial-gradient(120% 130% at 0% 0%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 58%);
+  }
+  .todo-row { gap: 14px; }
+  .todo-rank {
+    align-self: stretch; flex-shrink: 0; display: flex; align-items: center;
+    padding-right: 14px; border-right: 1px solid var(--hairline);
+    font-family: ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+    font-weight: 800; font-size: 13px; color: var(--ink-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .todo-row:first-child .todo-rank { color: var(--accent-strong); }
+  .todo-row .todo-icon { transition: transform .25s var(--ease-spring); }
+  .todo-row:hover .todo-icon { transform: scale(1.06) rotate(-2deg); }
+  @media (max-width: 640px) {
+    .todo-rank { align-self: center; border-right: none; padding-right: 0; }
+  }
+
+  /* ---- 14. Dagens uppdrag: psykologin i framstegsmätaren ----
+     Två saker gör mest skillnad för att man ska orka bli klar:
+     1) "X kvar" bredvid procenten — antal kvar motiverar mer än andel gjord
+        när man närmar sig mål (mållutningseffekten).
+     2) En rad som krediterar det Kanslio redan gjort i natt, så att dagen
+        aldrig börjar på noll utan på "nästan klart — godkänn bara". */
+  .progress-score { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .progress-remaining {
+    font-size: 12px; font-weight: 700; color: var(--ink-muted);
+    white-space: nowrap; font-variant-numeric: tabular-nums;
+  }
+  .progress-remaining.close { color: var(--accent-strong); }
+  .progress-nudge {
+    display: none; align-items: center; gap: 9px; margin-top: 14px;
+    padding: 11px 14px; border-radius: var(--r-md);
+    background: var(--bg-soft); border: 1px solid var(--hairline);
+    font-size: 13px; color: var(--ink-secondary); line-height: 1.45;
+  }
+  .progress-nudge.show { display: flex; }
+  .progress-nudge b { color: var(--ink); font-weight: 700; }
+  .progress-nudge svg { flex-shrink: 0; color: var(--accent-strong); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .progress-fill::after { animation: none; }
+    body { background-attachment: scroll; }
+  }
 </style>
 
 </head>
@@ -1512,6 +1785,16 @@
 
   <div class="main-col">
   <header class="topbar">
+    <div class="topbar-left">
+      <nav class="crumb" aria-label="Var du är">
+        <span class="crumb-root">Västerås SK</span>
+        <span class="crumb-sep" aria-hidden="true">/</span>
+        <span class="crumb-current" id="crumbCurrent">Översikt</span>
+      </nav>
+      <span class="live-pill" title="Kanslio bevakar mejl, fakturor och ärenden dygnet runt">
+        <span class="dot" aria-hidden="true"></span>Kanslio arbetar
+      </span>
+    </div>
     <div class="topbar-right">
       <label class="search">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -1588,9 +1871,16 @@
         </div>
       </div>
 
-      <div class="card card-pad reveal">
+      <div class="section-rule reveal">
+        <span class="section-rule-label">Att göra nu</span>
+        <span class="section-rule-line"></span>
+        <span class="section-rule-meta">Kanslio har förberett allt åt dig</span>
+      </div>
+
+      <div class="card card-pad todo-card reveal">
         <div class="card-head"><h2>Viktigast idag</h2></div>
         <div class="todo-row">
+          <span class="todo-rank" aria-hidden="true">1</span>
           <div class="todo-icon todo-icon-blue">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 7l9 6 9-6"/></svg>
           </div>
@@ -1601,6 +1891,7 @@
           <button class="btn-primary" data-goto="mejl">Granska</button>
         </div>
         <div class="todo-row">
+          <span class="todo-rank" aria-hidden="true">2</span>
           <div class="todo-icon todo-icon-green">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6"/></svg>
           </div>
@@ -1611,6 +1902,7 @@
           <button class="btn-primary" data-goto="fakturor">Granska</button>
         </div>
         <div class="todo-row">
+          <span class="todo-rank" aria-hidden="true">3</span>
           <div class="todo-icon todo-icon-amber">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
           </div>
@@ -1628,7 +1920,10 @@
             <h2>Dagens uppdrag</h2>
             <div class="progress-sub" id="progressSub">1 av 10 uppdrag klara idag</div>
           </div>
-          <div class="progress-percent-value tabular" data-format="int">0<span class="unit">%</span></div>
+          <div class="progress-score">
+            <div class="progress-percent-value tabular" data-format="int">0<span class="unit">%</span></div>
+            <div class="progress-remaining" id="progressRemaining"></div>
+          </div>
         </div>
         <div class="progress-track">
           <span class="progress-goal" aria-hidden="true">
@@ -1654,6 +1949,7 @@
           <span>Start</span>
           <span>Mål &#8226; 100%</span>
         </div>
+        <div class="progress-nudge" id="progressNudge"></div>
         <div class="mission-celebrate" id="missionCelebrate">
           <span class="mission-celebrate-icon">🎉</span>
           <div>
@@ -1668,8 +1964,19 @@
         <div class="mission-list" id="missionList"></div>
       </div>
 
+      <div class="section-rule reveal">
+        <span class="section-rule-label">Läget i kansliet</span>
+        <span class="section-rule-line"></span>
+        <span class="section-rule-meta">Jämfört med förra veckan</span>
+      </div>
+
       <div class="stat-grid" id="statGrid">
         <!-- stat cards injected by JS -->
+      </div>
+
+      <div class="section-rule reveal">
+        <span class="section-rule-label">Din tid &amp; din dag</span>
+        <span class="section-rule-line"></span>
       </div>
 
       <div class="content-grid">
@@ -1732,6 +2039,12 @@
         </span>
       </div>
 
+      <div class="section-rule reveal">
+        <span class="section-rule-label">Utkast att granska</span>
+        <span class="section-rule-line"></span>
+        <span class="section-rule-meta">Viktigast överst</span>
+      </div>
+
       <div class="card card-pad">
         <div id="mailList"></div>
       </div>
@@ -1764,7 +2077,18 @@
         </span>
       </div>
 
+      <div class="section-rule reveal">
+        <span class="section-rule-label">Läget i ekonomin</span>
+        <span class="section-rule-line"></span>
+      </div>
+
       <div class="stat-grid" id="invoiceStatGrid"></div>
+
+      <div class="section-rule reveal">
+        <span class="section-rule-label">Alla fakturor</span>
+        <span class="section-rule-line"></span>
+        <span class="section-rule-meta">Förfallodatum närmast först</span>
+      </div>
 
       <div class="card card-pad">
         <div class="table-wrap">
@@ -1788,6 +2112,12 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
           Nytt ärende
         </button>
+      </div>
+
+      <div class="section-rule reveal">
+        <span class="section-rule-label">Alla ärenden</span>
+        <span class="section-rule-line"></span>
+        <span class="section-rule-meta">Filtrera på status</span>
       </div>
 
       <div class="card card-pad">
@@ -3343,11 +3673,39 @@
     setTimeout(() => spawnFireworkBurst(layer, 10, 6, colors), 520);
   }
 
+  const NUDGE_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13H11l-1 9 8.5-11H12l1-9z"/></svg>';
+
+  // Texten under mätaren byter ton med läget: krediterar Kanslios nattjobb när
+  // inget är gjort, och räknar ner de sista stegen när målet är nära.
+  function missionNudgeHTML(total, done) {
+    const left = total - done;
+    if (total === 0) return '';
+    if (done === 0) {
+      return `${NUDGE_ICON}<span>Kanslio har redan skrivit och sorterat allt det här åt dig i natt — <b>${total} saker</b> väntar bara på ditt godkännande.</span>`;
+    }
+    if (left === 1) return `${NUDGE_ICON}<span><b>Ett enda uppdrag kvar</b> till målet.</span>`;
+    if (left <= 3) return `${NUDGE_ICON}<span>Bara <b>${left} kvar</b> — du är nästan i mål.</span>`;
+    return `${NUDGE_ICON}<span><b>${done} avklarade</b> hittills idag. ${left} kvar till målet.</span>`;
+  }
+
   let missionCelebrated = false;
   function renderProgress() {
     const { total, done, percent } = computeMissionProgress();
     const sub = document.getElementById('progressSub');
     if (sub) sub.textContent = `${done} av ${total} uppdrag klara idag`;
+
+    const left = Math.max(0, total - done);
+    const remaining = document.getElementById('progressRemaining');
+    if (remaining) {
+      remaining.textContent = left === 0 ? 'allt klart' : `${left} kvar`;
+      remaining.classList.toggle('close', left > 0 && left <= 3);
+    }
+    const nudge = document.getElementById('progressNudge');
+    if (nudge) {
+      const html = left === 0 ? '' : missionNudgeHTML(total, done);
+      nudge.innerHTML = html;
+      nudge.classList.toggle('show', !!html);
+    }
 
     const fill = document.querySelector('.progress-fill');
     const percentEl = document.querySelector('.progress-percent-value');
@@ -5142,12 +5500,18 @@ ${sectionsHtml}
 
   // ---- Sidebar navigation ----
   function activate(view) {
+    let label = '';
     document.querySelectorAll('.nav-item[data-view]').forEach(b => {
       const isActive = b.dataset.view === view;
       b.classList.toggle('active', isActive);
       b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      if (isActive) label = b.querySelector('.nav-label')?.textContent || '';
     });
     document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
+
+    // Brödsmulan i topbaren ska alltid svara på "var är jag nu?"
+    const crumb = document.getElementById('crumbCurrent');
+    if (crumb && label) crumb.textContent = label;
   }
 
   // ---- Klubblogga: uppladdad bild sparas och visas i sidomenyn + Mitt Kanslio ----
