@@ -678,7 +678,7 @@
   .mail-row { border-radius: var(--r-md); padding: 17px 14px; cursor: pointer; transition: background .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s cubic-bezier(.2,.8,.2,1); }
   .mail-row:hover { background: var(--bg-soft); box-shadow: var(--shadow-sm); }
   .mail-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-  .mail-row-top { display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 14px; }
+  .mail-row-top { display: grid; grid-template-columns: 1fr auto auto auto auto; align-items: center; gap: 14px; }
   .mail-from { font-weight: 700; font-size: 14px; }
   .mail-subject { font-size: 13.5px; color: var(--ink-secondary); margin-top: 1px; }
   .mail-time { font-size: 12px; color: var(--ink-muted); white-space: nowrap; }
@@ -1749,6 +1749,40 @@
     background-image: linear-gradient(180deg, var(--warn), var(--warn));
   }
 
+  /* ---- Mejl-vyn: huvudlista + permanent Skräppost-kolumn ----
+     Skräppost är alltid där (Microsofts filter missar då och då), så den får
+     en egen tyst plats i sidokolumnen i stället för en notis som ändå aldrig
+     försvinner. Samma radkomponent som huvudlistan, bara kompaktare. */
+  .mail-content-grid { align-items: start; }
+  .junk-card .card-head h2 {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 15px; color: var(--ink-secondary);
+  }
+  .junk-card .card-head svg { color: var(--ink-muted); flex-shrink: 0; }
+  .junk-card-sub { font-size: 12.5px; color: var(--ink-muted); line-height: 1.55; margin: -2px 0 4px; }
+  .junk-count-badge {
+    background: var(--warn-soft); color: var(--warn-ink);
+    font-size: 11px; font-weight: 800; min-width: 20px; height: 20px; padding: 0 6px;
+    border-radius: var(--r-pill); display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .junk-count-badge[hidden] { display: none; }
+  .junk-empty {
+    font-size: 13px; color: var(--ink-muted); text-align: center;
+    padding: 22px 8px; line-height: 1.5;
+  }
+  /* Kompakt variant av samma .mail-row — smalare kolumn, mindre skrud */
+  .junk-card .mail-row-top { grid-template-columns: 1fr auto auto; gap: 10px; }
+  .junk-card .mail-row-top > div:first-child { min-width: 0; }
+  .junk-card .mail-from, .junk-card .mail-subject {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .junk-card .priority-chip { display: none; }
+  .junk-card .mail-row { padding: 13px 10px; }
+  @media (max-width: 1000px) {
+    .mail-content-grid { grid-template-columns: 1fr; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .progress-fill::after { animation: none; }
     body { background-attachment: scroll; }
@@ -2090,14 +2124,32 @@
         </div>
       </div>
 
-      <div class="section-rule reveal">
-        <span class="section-rule-label">Utkast att granska</span>
-        <span class="section-rule-line"></span>
-        <span class="section-rule-meta">Viktigast överst</span>
-      </div>
+      <div class="content-grid mail-content-grid">
+        <div class="col-stack">
+          <div class="section-rule reveal">
+            <span class="section-rule-label">Utkast att granska</span>
+            <span class="section-rule-line"></span>
+            <span class="section-rule-meta">Viktigast överst</span>
+          </div>
 
-      <div class="card card-pad">
-        <div id="mailList"></div>
+          <div class="card card-pad">
+            <div id="mailList"></div>
+          </div>
+        </div>
+
+        <div class="col-stack">
+          <div class="card card-pad junk-card reveal">
+            <div class="card-head">
+              <h2>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+                Skräppost
+              </h2>
+              <span class="junk-count-badge" id="junkCountBadge" hidden>0</span>
+            </div>
+            <p class="junk-card-sub">Microsofts filter sorterar ibland in riktiga mejl här av misstag. Kanslio bevakar mappen åt dig — du kan svara direkt nedan, precis som i inkorgen.</p>
+            <div id="junkMailList"></div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -3517,10 +3569,13 @@
     return `<span class="status-chip status-${status}"><span class="dot"></span>${labelMap[status]}</span>`;
   }
 
-  function renderMail() {
-    saveStored('mail', MAIL);
-    const prioLabel = { hog: 'Hög prioritet', medel: 'Medel prioritet', lag: 'Låg prioritet' };
-    document.getElementById('mailList').innerHTML = MAIL.length === 0 ? emptyStateHTML(EMPTY_ICON_MAIL, 'Inga mejl just nu', 'Nya mejlutkast dyker upp här så snart Kanslio skrivit klart dem åt dig.') : MAIL.map((m, i) => `
+  const MAIL_PRIO_LABEL = { hog: 'Hög prioritet', medel: 'Medel prioritet', lag: 'Låg prioritet' };
+
+  // Byggs en gång, återanvänds för både huvudlistan och Skräppost-kolumnen —
+  // samma radutseende, samma granska/redigera/skicka-flöde på båda ställena.
+  function mailRowHtml(m, i) {
+    const junk = m.folder === 'skrappost';
+    return `
       <div class="mail-row reveal" ${revealDelay(i)} data-idx="${i}">
         <div class="mail-row-top">
           <div>
@@ -3529,12 +3584,12 @@
           </div>
           ${m.sent
             ? `<span class="status-chip status-klar"><span class="dot"></span>Skickat</span>`
-            : `<span class="priority-chip priority-${m.priority}">${prioLabel[m.priority]}</span>`}
+            : `<span class="priority-chip priority-${m.priority}">${MAIL_PRIO_LABEL[m.priority]}</span>`}
           <span class="mail-time tabular">${m.sent ? 'Skickat' : 'Utkast'} ${m.time}</span>
           <svg class="mail-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
         </div>
         <div class="mail-detail">
-          <div class="detail-label">${m.sent ? 'Skickat av dig' : m.graphId ? 'Riktigt mejl ur din inkorg' : 'AI-utkast, redo att granska'}</div>
+          <div class="detail-label">${m.sent ? 'Skickat av dig' : m.graphId ? (junk ? 'Hittat i Skräppost — granska innan du svarar' : 'Riktigt mejl ur din inkorg') : 'AI-utkast, redo att granska'}</div>
           <span class="mail-draft-text"></span>
           ${m.sent ? '' : m.graphId
             ? `<div class="mail-reply">
@@ -3556,44 +3611,59 @@
                  <button class="btn-ghost" type="button">Redigera</button>
                </div>`}
         </div>
-      </div>`).join('');
+      </div>`;
+  }
 
-    document.querySelectorAll('#mailList .mail-row').forEach(row => {
-      const idx = parseInt(row.dataset.idx, 10);
-      const m = MAIL[idx];
-      row.querySelector('.mail-row-top').addEventListener('click', () => {
-        row.classList.toggle('open');
-        if (row.classList.contains('open') && !row.dataset.typed) {
-          row.dataset.typed = '1';
-          typewrite(row.querySelector('.mail-draft-text'), m.sent ? m.body : m.draft);
-          // Riktigt mejl: be Kanslio skriva svaret direkt när man öppnar det,
-          // så utkastet är på plats utan att man behöver be om det.
-          if (m.graphId) OUTLOOK.prepareReply(m, row);
-        }
-      });
-
-      if (m.graphId && !m.sent) {
-        row.querySelectorAll('.mail-reply-actions button').forEach(btn => {
-          btn.addEventListener('click', (e) => e.stopPropagation());
-        });
-        row.querySelector('.mail-reply-text')
-          ?.addEventListener('click', (e) => e.stopPropagation());
-        row.querySelector('.mail-reply-save')
-          ?.addEventListener('click', () => OUTLOOK.saveReply(m, row));
-        row.querySelector('.mail-reply-send')
-          ?.addEventListener('click', () => OUTLOOK.sendReply(m, row, idx));
-      } else {
-        const sendBtn = row.querySelector('.detail-actions .btn-primary');
-        if (sendBtn) {
-          sendBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            sendMailDraft(idx);
-          });
-        }
+  function wireMailRow(row) {
+    const idx = parseInt(row.dataset.idx, 10);
+    const m = MAIL[idx];
+    row.querySelector('.mail-row-top').addEventListener('click', () => {
+      row.classList.toggle('open');
+      if (row.classList.contains('open') && !row.dataset.typed) {
+        row.dataset.typed = '1';
+        typewrite(row.querySelector('.mail-draft-text'), m.sent ? m.body : m.draft);
+        // Riktigt mejl: be Kanslio skriva svaret direkt när man öppnar det,
+        // så utkastet är på plats utan att man behöver be om det.
+        if (m.graphId) OUTLOOK.prepareReply(m, row);
       }
     });
 
-    const pendingCount = MAIL.filter(m => !m.sent).length;
+    if (m.graphId && !m.sent) {
+      row.querySelectorAll('.mail-reply-actions button').forEach(btn => {
+        btn.addEventListener('click', (e) => e.stopPropagation());
+      });
+      row.querySelector('.mail-reply-text')
+        ?.addEventListener('click', (e) => e.stopPropagation());
+      row.querySelector('.mail-reply-save')
+        ?.addEventListener('click', () => OUTLOOK.saveReply(m, row));
+      row.querySelector('.mail-reply-send')
+        ?.addEventListener('click', () => OUTLOOK.sendReply(m, row, idx));
+    } else {
+      const sendBtn = row.querySelector('.detail-actions .btn-primary');
+      if (sendBtn) {
+        sendBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          sendMailDraft(idx);
+        });
+      }
+    }
+  }
+
+  /**
+   * Huvudlistan — inkorgen. Skräppost renderas medvetet inte här: den har en
+   * egen permanent kolumn (renderJunkMail) i stället för att blandas in eller
+   * bara flaggas med en notis som ändå alltid skulle vara synlig.
+   */
+  function renderMail() {
+    saveStored('mail', MAIL);
+    const items = MAIL.map((m, i) => ({ m, i })).filter(({ m }) => m.folder !== 'skrappost');
+
+    document.getElementById('mailList').innerHTML = items.length === 0
+      ? emptyStateHTML(EMPTY_ICON_MAIL, 'Inga mejl just nu', 'Nya mejlutkast dyker upp här så snart Kanslio skrivit klart dem åt dig.')
+      : items.map(({ m, i }) => mailRowHtml(m, i)).join('');
+    document.querySelectorAll('#mailList .mail-row').forEach(wireMailRow);
+
+    const pendingCount = items.filter(({ m }) => !m.sent).length;
     const mailHeroEl = document.getElementById('mailHeroTitle');
     const heroText = `I natt skrev Kanslio ${pendingCount} utkast åt dig`;
     if (mailHeroEl.dataset.typed) {
@@ -3602,6 +3672,28 @@
       mailHeroEl.dataset.type = heroText;
     }
     document.getElementById('mailNavBadge').textContent = pendingCount;
+    observeReveals();
+    renderJunkMail();
+  }
+
+  /** Skräppost-kolumnen — permanent synlig, samma rad-komponent som ovan. */
+  function renderJunkMail() {
+    const list = document.getElementById('junkMailList');
+    if (!list) return;
+
+    const items = MAIL.map((m, i) => ({ m, i })).filter(({ m }) => m.folder === 'skrappost');
+
+    list.innerHTML = items.length === 0
+      ? '<div class="junk-empty">Inget i skräpposten just nu.</div>'
+      : items.map(({ m, i }) => mailRowHtml(m, i)).join('');
+    document.querySelectorAll('#junkMailList .mail-row').forEach(wireMailRow);
+
+    const badge = document.getElementById('junkCountBadge');
+    if (badge) {
+      const pending = items.filter(({ m }) => !m.sent).length;
+      badge.hidden = pending === 0;
+      badge.textContent = pending;
+    }
     observeReveals();
   }
 
@@ -3664,7 +3756,12 @@
       location.reload();
     }
 
-    /** Byter ut demomejlen mot de riktiga i inkorgen. */
+    /**
+     * Byter ut demomejlen mot de riktiga — från både inkorgen och Skräppost.
+     * Microsofts spamfilter kan gömma riktiga mejl till kansliet i Skräppost
+     * innan de någonsin syns i inkorgen, så den mappen bevakas separat i en
+     * egen permanent kolumn i stället för att bara flaggas i en notis.
+     */
     async function loadMail() {
       const { mail } = await api('/api/mail');
       MAIL.length = 0;
@@ -3675,11 +3772,12 @@
         subject: m.subject,
         priority: m.priority,
         time: m.time,
+        folder: m.folder,
         // Vid expandering visas mejlets egen text; utkastet skrivs först när
         // man ber om det, så vi inte gissar svar på allt i inkorgen.
         draft: m.preview || '(tomt meddelande)',
       }));
-      renderMail();
+      renderMail(); // ritar även Skräppost-kolumnen (renderJunkMail körs internt)
       renderTodoSummary();
     }
 
@@ -3839,7 +3937,9 @@
     const mailTitle = document.getElementById('todoMailTitle');
     const mailSub = document.getElementById('todoMailSub');
     if (mailTitle) {
-      const pending = MAIL.filter(m => !m.sent);
+      // Skräppost räknas medvetet inte hit — den har sin egen kolumn i Mejl
+      // och ska inte blåsa upp "Dagens uppdrag" med spam.
+      const pending = MAIL.filter(m => !m.sent && m.folder !== 'skrappost');
       const hogCount = pending.filter(m => m.priority === 'hog').length;
       mailTitle.textContent = `${pending.length} mejlutkast redo att skickas`;
       if (mailSub) {
@@ -3876,7 +3976,7 @@
   function getMissionItems() {
     const items = [];
     MAIL.forEach((m, i) => {
-      if (!m.sent) items.push({ type: 'mejl', key: `mail-${i}`, title: m.from, sub: m.subject, goto: 'mejl', idx: i });
+      if (!m.sent && m.folder !== 'skrappost') items.push({ type: 'mejl', key: `mail-${i}`, title: m.from, sub: m.subject, goto: 'mejl', idx: i });
     });
     INVOICES.forEach((inv, i) => {
       if (inv.status === 'pagar') items.push({ type: 'faktura', key: `inv-${i}`, title: inv.title, sub: inv.sub, goto: 'fakturor', idx: i });
