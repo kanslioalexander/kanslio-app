@@ -46,6 +46,13 @@
     --r-md: 20px;
     --r-sm: 14px;
     --r-pill: 999px;
+    /* Premium-lagret: hårfina linjer, fokusglöd och rörelsekurvor */
+    --hairline: #F0E9D8;
+    --ring: rgba(36,83,235,.16);
+    --glow: rgba(36,83,235,.28);
+    --sheen: rgba(255,255,255,.75);
+    --ease-out: cubic-bezier(.22,1,.36,1);
+    --ease-spring: cubic-bezier(.34,1.42,.5,1);
   }
   @media (prefers-color-scheme: dark) {
     :root:where(:not([data-theme="light"])) {
@@ -76,6 +83,10 @@
       --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
       --shadow-md: 0 10px 28px rgba(0,0,0,.35);
       --shadow-lg: 0 20px 50px rgba(0,0,0,.5);
+      --hairline: rgba(244,241,231,.055);
+      --ring: rgba(91,140,255,.24);
+      --glow: rgba(91,140,255,.34);
+      --sheen: rgba(255,255,255,.06);
     }
   }
   :root[data-theme="dark"] {
@@ -106,6 +117,10 @@
     --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
     --shadow-md: 0 10px 28px rgba(0,0,0,.35);
     --shadow-lg: 0 20px 50px rgba(0,0,0,.5);
+    --hairline: rgba(244,241,231,.055);
+    --ring: rgba(91,140,255,.24);
+    --glow: rgba(91,140,255,.34);
+    --sheen: rgba(255,255,255,.06);
   }
   :root[data-theme="light"] {
     color-scheme: light;
@@ -117,6 +132,8 @@
     --neutral-dot: #98A2B8; --neutral-ink: #5A6478; --neutral-soft: #EEF0F4;
     --shadow-sm: 0 1px 2px rgba(22,34,62,.05); --shadow-md: 0 10px 28px rgba(22,34,62,.08);
     --shadow-lg: 0 18px 44px rgba(22,34,62,.14);
+    --hairline: #F0E9D8; --ring: rgba(36,83,235,.16); --glow: rgba(36,83,235,.28);
+    --sheen: rgba(255,255,255,.75);
   }
 
   * { box-sizing: border-box; }
@@ -276,10 +293,13 @@
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: var(--r-pill);
-    padding: 8px 16px;
+    padding: 8px 12px 8px 16px;
     width: 220px;
     color: var(--ink-muted);
+    cursor: pointer;
+    transition: border-color .15s ease, box-shadow .15s ease;
   }
+  .search:hover { border-color: var(--accent-soft-strong); box-shadow: var(--shadow-sm); }
   .search input {
     border: none;
     background: transparent;
@@ -287,8 +307,13 @@
     color: var(--ink);
     font-size: 14px;
     width: 100%;
+    cursor: pointer;
   }
   .search input::placeholder { color: var(--ink-muted); }
+  .search-kbd {
+    font: 700 11px/1 inherit; color: var(--ink-muted); background: var(--surface);
+    border: 1px solid var(--border); border-radius: 5px; padding: 3px 6px; flex-shrink: 0;
+  }
   .icon-btn {
     width: 38px; height: 38px;
     border-radius: 50%;
@@ -299,6 +324,7 @@
     cursor: pointer;
     transition: transform .15s ease, background .15s ease, color .15s ease;
     flex-shrink: 0;
+    position: relative;
   }
   .icon-btn:hover { background: var(--accent-soft); color: var(--accent-strong); transform: translateY(-1px); }
   .avatar {
@@ -346,6 +372,13 @@
   .profile-menu-item:disabled:hover { background: transparent; }
   .profile-menu-item:disabled:hover svg { color: var(--ink-muted); }
   .profile-menu-divider { height: 1px; background: var(--border); margin: 6px 4px; }
+
+  .notif-badge { position: absolute; top: -3px; right: -3px; font-size: 10px; min-width: 17px; height: 17px; border: 2px solid var(--surface-2); }
+  .notif-badge.zero { display: none; }
+  .notif-panel { width: 340px; max-height: 70vh; overflow-y: auto; }
+  .notif-panel .activity-item { padding: 9px 10px; border-radius: var(--r-sm); }
+  .notif-panel .empty-state { padding: 28px 12px; }
+  .notif-panel .empty-state-icon { width: 40px; height: 40px; margin-bottom: 10px; }
 
   .page-head.page-head-logo { flex-wrap: nowrap; align-items: center; }
   .page-head-title { flex: 1 1 auto; min-width: 0; }
@@ -475,13 +508,14 @@
     display: grid;
     grid-template-columns: 1fr auto auto;
     align-items: center;
-    gap: 14px;
-    padding: 12px 10px;
+    gap: 16px;
+    padding: 16px 14px;
     border-radius: var(--r-md);
-    transition: background .15s ease;
+    transition: background .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s cubic-bezier(.2,.8,.2,1);
     cursor: pointer;
   }
-  .case-row:hover { background: var(--bg-soft); }
+  .case-row:hover { background: var(--bg-soft); box-shadow: var(--shadow-sm); }
+  .case-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
   .case-main { min-width: 0; }
   .case-title { font-weight: 700; font-size: 14.5px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .case-client { font-size: 13px; color: var(--ink-muted); margin-top: 2px; }
@@ -503,6 +537,15 @@
   .status-klar .dot { background: var(--good); }
 
   .footnote { font-size: 12.5px; color: var(--ink-muted); padding: 10px 10px 0; }
+
+  /* ---------- Empty states ---------- */
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 48px 20px; }
+  .empty-state-icon {
+    width: 52px; height: 52px; border-radius: var(--r-lg); background: var(--bg-soft); color: var(--ink-muted);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
+  }
+  .empty-state-title { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .empty-state-sub { font-size: 13.5px; color: var(--ink-muted); max-width: 320px; line-height: 1.5; }
 
   /* ---------- Agenda / activity ---------- */
   .agenda-item { display: flex; gap: 12px; padding: 10px 4px; align-items: flex-start; }
@@ -631,9 +674,10 @@
     .todo-row .btn-primary { margin-left: 60px; }
   }
 
-  .mail-row { border-radius: var(--r-md); padding: 14px 10px; cursor: pointer; transition: background .15s ease; }
-  .mail-row:hover { background: var(--bg-soft); }
-  .mail-row-top { display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 12px; }
+  .mail-row { border-radius: var(--r-md); padding: 17px 14px; cursor: pointer; transition: background .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s cubic-bezier(.2,.8,.2,1); }
+  .mail-row:hover { background: var(--bg-soft); box-shadow: var(--shadow-sm); }
+  .mail-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .mail-row-top { display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 14px; }
   .mail-from { font-weight: 700; font-size: 14px; }
   .mail-subject { font-size: 13.5px; color: var(--ink-secondary); margin-top: 1px; }
   .mail-time { font-size: 12px; color: var(--ink-muted); white-space: nowrap; }
@@ -665,11 +709,12 @@
     font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-muted);
     border-bottom: 1px solid var(--border);
   }
-  .invoice-item { border-radius: var(--r-md); cursor: pointer; transition: background .15s ease; }
-  .invoice-item:hover { background: var(--bg-soft); }
+  .invoice-item { border-radius: var(--r-md); cursor: pointer; transition: background .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s cubic-bezier(.2,.8,.2,1); }
+  .invoice-item:hover { background: var(--bg-soft); box-shadow: var(--shadow-sm); }
+  .invoice-item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
   .invoice-row {
-    display: grid; grid-template-columns: 2fr 1.1fr 1.2fr 1fr .8fr 24px; gap: 14px; align-items: center;
-    padding: 14px; min-width: 680px;
+    display: grid; grid-template-columns: 2fr 1.1fr 1.2fr 1fr .8fr 24px; gap: 16px; align-items: center;
+    padding: 18px 16px; min-width: 680px;
   }
   .invoice-amount { font-weight: 700; }
   .mini-avatar.ai { background: var(--accent-soft); color: var(--accent-strong); border-color: transparent; }
@@ -679,8 +724,9 @@
 
   /* ---------- Schemaplanering ---------- */
   .sub-note { font-size: 13px; color: var(--ink-secondary); margin: -2px 0 10px; }
-  .team-row { border-radius: var(--r-md); padding: 4px 10px; transition: background .15s ease; cursor: pointer; }
-  .team-row:hover { background: var(--bg-soft); }
+  .team-row { border-radius: var(--r-md); padding: 6px 14px; transition: background .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s cubic-bezier(.2,.8,.2,1); cursor: pointer; }
+  .team-row:hover { background: var(--bg-soft); box-shadow: var(--shadow-sm); }
+  .team-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
   .team-row-top {
     display: grid; grid-template-columns: 1.6fr auto auto auto auto; align-items: center; gap: 14px;
     padding: 12px 0;
@@ -1252,6 +1298,30 @@
     transition: opacity .2s ease, transform .22s cubic-bezier(.2,.8,.2,1);
   }
   .modal-overlay.open .modal-panel { opacity: 1; transform: translateY(0) scale(1); }
+
+  /* ---------- Kommandopalett (Cmd/Ctrl+K) ---------- */
+  .cmdk-panel {
+    background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow-lg);
+    width: 100%; max-width: 600px; flex-shrink: 0; overflow: hidden;
+    opacity: 0; transform: translateY(12px) scale(.98);
+    transition: opacity .2s ease, transform .22s cubic-bezier(.2,.8,.2,1);
+  }
+  .modal-overlay.open .cmdk-panel { opacity: 1; transform: translateY(0) scale(1); }
+  .cmdk-input-row { display: flex; align-items: center; gap: 10px; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+  .cmdk-input-row svg { color: var(--ink-muted); flex-shrink: 0; }
+  .cmdk-input-row input { flex: 1; border: none; outline: none; background: transparent; font: inherit; font-size: 15px; color: var(--ink); }
+  .cmdk-esc { font-size: 11px; font-weight: 700; color: var(--ink-muted); background: var(--surface-2); border: 1px solid var(--border); border-radius: 5px; padding: 3px 7px; flex-shrink: 0; }
+  .cmdk-list { max-height: 360px; overflow-y: auto; padding: 8px; }
+  .cmdk-item {
+    display: flex; align-items: center; gap: 12px; width: 100%; padding: 9px 10px;
+    border: none; background: transparent; border-radius: var(--r-sm); cursor: pointer;
+    text-align: left; font: inherit; font-size: 14px; font-weight: 600; color: var(--ink);
+    transition: background .1s ease, color .1s ease;
+  }
+  .cmdk-item .nav-icon { flex-shrink: 0; }
+  .cmdk-item:hover, .cmdk-item.active { background: var(--accent-soft); color: var(--accent-strong); }
+  .cmdk-item:hover .nav-icon, .cmdk-item.active .nav-icon { background: var(--surface); color: var(--accent-strong); }
+  .cmdk-empty { padding: 28px; text-align: center; color: var(--ink-muted); font-size: 13.5px; }
   .modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
   .modal-head h2 { font-size: 19px; }
   .modal-head p { margin: 4px 0 0; font-size: 13px; color: var(--ink-secondary); }
@@ -1378,6 +1448,262 @@
     .team-meta, .facility-row input { text-align: left; }
     .schedule-toolbar { flex-direction: column; align-items: stretch; }
   }
+
+  /* ==========================================================================
+     PREMIUM-LAGRET
+     Ligger sist i stylesheeten med flit: allt härunder förfinar det som redan
+     definierats ovan (ljus, hårlinjer, rörelse, tryckkänsla) utan att skriva om
+     det. Vill man backa hela polishen räcker det att ta bort detta block.
+     ========================================================================== */
+
+  /* ---- 1. Atmosfär: bakgrunden ska ha ljus i sig, inte vara platt papper ---- */
+  body {
+    background-image:
+      radial-gradient(115% 70% at 8% -12%, color-mix(in srgb, var(--surface) 65%, transparent), transparent 58%),
+      radial-gradient(80% 55% at 102% -4%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 52%);
+    background-attachment: fixed;
+  }
+  .sidebar {
+    background-image: linear-gradient(180deg, color-mix(in srgb, var(--surface) 60%, transparent), transparent 240px);
+  }
+
+  /* ---- 2. Rullningslister: smala och i temat ---- */
+  * { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong); border-radius: var(--r-pill);
+    border: 3px solid transparent; background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--ink-muted); background-clip: content-box; }
+
+  /* ---- 3. Typografi: stramare rubriker, siffror i tabellsiffror ---- */
+  h1, h2 { letter-spacing: -0.022em; }
+  .page-head h1 { font-size: 32px; letter-spacing: -0.03em; }
+  .page-head .sub, .todo-sub, .empty-state-sub, .progress-sub { text-wrap: pretty; }
+  .stat-value, .time-teaser-value, .time-hero-value, .progress-percent-value,
+  .plan-seats-value, .settings-stat strong, .day-head .num {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.032em;
+  }
+
+  /* ---- 4. "Strecket": sektionsrubrik som delar upp en sida i kapitel ----
+     Ger ögat vilopunkter och gör långa vyer skannbara på ett ögonkast. */
+  .section-rule { display: flex; align-items: center; gap: 14px; margin: 12px 2px -8px; }
+  .section-rule-label {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .09em;
+    color: var(--ink-muted); white-space: nowrap;
+  }
+  .section-rule-label::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); opacity: .5; flex-shrink: 0;
+  }
+  .section-rule-line {
+    flex: 1; min-width: 20px; height: 1px;
+    background: linear-gradient(90deg, var(--border-strong), var(--hairline) 45%, transparent);
+  }
+  .section-rule-meta { font-size: 12px; font-weight: 600; color: var(--ink-muted); white-space: nowrap; }
+
+  /* ---- 5. Hårfina linjer inuti listor: struktur utan tunga ramar ---- */
+  .agenda-item + .agenda-item,
+  .activity-item + .activity-item,
+  .info-row + .info-row { border-top: 1px solid var(--hairline); }
+  .mission-row + .mission-row::after {
+    content: ''; position: absolute; left: 8px; right: 8px; top: 0; height: 1px;
+    background: var(--hairline);
+  }
+  /* Långa listor: en indragen hårlinje mellan raderna gör dem lätta att följa
+     i sidled utan att listan ser ut som en tabell med ramar. */
+  .mail-row + .mail-row::after,
+  .invoice-item + .invoice-item::after,
+  .case-row + .case-row::after,
+  .full-row + .full-row::after,
+  .team-row + .team-row::after {
+    content: ''; position: absolute; left: 14px; right: 14px; top: 0; height: 1px;
+    background: var(--hairline); pointer-events: none;
+  }
+
+  /* ---- 6. Accentstrecket: markerar raden man har under muspekaren ---- */
+  .case-row, .mail-row, .invoice-item, .full-row, .team-row,
+  .saved-protocol-row, .mission-row, .todo-row { position: relative; }
+  .case-row::before, .mail-row::before, .invoice-item::before, .full-row::before,
+  .team-row::before, .saved-protocol-row::before, .mission-row::before {
+    content: ''; position: absolute; left: 0; top: 12%; bottom: 12%; width: 3px;
+    border-radius: var(--r-pill); background: var(--accent);
+    transform: scaleY(.3); opacity: 0; pointer-events: none;
+    transition: transform .24s var(--ease-out), opacity .24s var(--ease-out);
+  }
+  .case-row:hover::before, .mail-row:hover::before, .invoice-item:hover::before,
+  .full-row:hover::before, .team-row:hover::before, .saved-protocol-row:hover::before,
+  .mission-row:hover::before,
+  .case-row:focus-visible::before, .mail-row:focus-visible::before,
+  .invoice-item:focus-visible::before, .team-row:focus-visible::before {
+    transform: scaleY(1); opacity: 1;
+  }
+
+  /* Sidomenyn: ett streck i kanten talar om var man står */
+  .nav-item { position: relative; }
+  .nav-item::before {
+    content: ''; position: absolute; left: -14px; top: 50%; width: 3px; height: 0;
+    border-radius: 0 var(--r-pill) var(--r-pill) 0; background: var(--accent);
+    transform: translateY(-50%); transition: height .28s var(--ease-spring);
+  }
+  .nav-item.active::before { height: 24px; box-shadow: 0 0 12px -2px var(--glow); }
+  .sidebar.collapsed .nav-item::before { left: -10px; }
+  .nav-icon { transition: background .15s ease, color .15s ease, transform .22s var(--ease-spring); }
+  .nav-item:hover .nav-icon { transform: translateY(-1px) scale(1.06); }
+
+  /* ---- 7. Kort: mjukt djup i stället för platt vit ruta ---- */
+  .card {
+    position: relative;
+    box-shadow: var(--shadow-sm), inset 0 1px 0 var(--sheen);
+    transition: box-shadow .28s var(--ease-out), border-color .28s var(--ease-out), transform .28s var(--ease-out);
+  }
+  .stat-card:hover, .stat-card.linkable:hover {
+    box-shadow: var(--shadow-md), inset 0 1px 0 var(--sheen);
+    transform: translateY(-3px);
+  }
+  /* Tunn accentlinje som tänds längs kortets överkant vid hover */
+  .stat-card.linkable::after {
+    content: ''; position: absolute; left: 22px; right: 22px; top: 0; height: 2px;
+    border-radius: var(--r-pill); pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0; transition: opacity .28s var(--ease-out);
+  }
+  .stat-card.linkable:hover::after { opacity: .9; }
+
+  /* ---- 8. Knappar: tyngd, glöd och tryckkänsla ---- */
+  .btn-primary {
+    background-image: linear-gradient(180deg, color-mix(in srgb, var(--accent) 86%, #FFF), var(--accent));
+    box-shadow: 0 1px 2px rgba(22,34,62,.12), 0 8px 18px -10px var(--glow);
+    transition: transform .18s var(--ease-out), box-shadow .24s var(--ease-out),
+                background-color .18s ease, filter .18s ease;
+  }
+  .btn-primary:hover {
+    background-image: linear-gradient(180deg, color-mix(in srgb, var(--accent-strong) 86%, #FFF), var(--accent-strong));
+    box-shadow: 0 2px 5px rgba(22,34,62,.14), 0 16px 30px -12px var(--glow);
+    transform: translateY(-1.5px);
+  }
+  .btn-primary:active { transform: translateY(0) scale(.97); box-shadow: 0 1px 2px rgba(22,34,62,.18); }
+  .btn-primary:disabled { background-image: none; box-shadow: none; }
+  .btn-ghost, .pill-filter, .suggestion-chip, .icon-btn, .day-chip, .link, .chat-send {
+    transition: transform .16s var(--ease-out), background .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease;
+  }
+  .btn-ghost:active, .pill-filter:active, .suggestion-chip:active,
+  .icon-btn:active, .day-chip:active, .chat-send:active { transform: scale(.95); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent-strong); box-shadow: 0 4px 12px -8px var(--glow); }
+
+  /* ---- 9. Fokus: mjuk halo i stället för hård kantlinje ---- */
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; box-shadow: 0 0 0 5px var(--ring); }
+  .search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring); }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus,
+  .chat-input-row input:focus, .facility-row input:focus { box-shadow: 0 0 0 4px var(--ring); }
+
+  /* ---- 10. Rörelse: mjukare insvep och en levande framstegsmätare ---- */
+  .reveal { transform: translateY(18px) scale(.995); transition: opacity .6s var(--ease-out), transform .6s var(--ease-out); }
+  .reveal.in-view { transform: none; }
+
+  .progress-ball { z-index: 3; }
+  .progress-fill::after {
+    content: ''; position: absolute; inset: 0; z-index: 1; border-radius: inherit; pointer-events: none;
+    background: linear-gradient(100deg, transparent 22%, rgba(255,255,255,.42) 50%, transparent 78%);
+    background-size: 240% 100%;
+    animation: progress-sheen 3s linear infinite;
+  }
+  @keyframes progress-sheen {
+    from { background-position: 190% 0; }
+    to { background-position: -90% 0; }
+  }
+
+  /* ---- 11. Topbar: vänsterkanten talar om var man är och att AI:n jobbar ---- */
+  .topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .crumb { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; min-width: 0; }
+  .crumb-root { color: var(--ink-muted); font-weight: 600; white-space: nowrap; }
+  .crumb-sep { color: var(--ink-muted); opacity: .5; }
+  .crumb-current {
+    font-weight: 700; color: var(--ink); white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .live-pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12px; font-weight: 700; color: var(--good-ink);
+    background: var(--good-soft); border: 1px solid transparent;
+    padding: 5px 12px 5px 10px; border-radius: var(--r-pill); white-space: nowrap;
+  }
+  .live-pill .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--good); flex-shrink: 0;
+    animation: pulse-good 2.2s ease-out infinite;
+  }
+  @media (max-width: 880px) { .live-pill { display: none; } }
+  @media (max-width: 720px) { .topbar-left { order: -1; width: 100%; } }
+
+  /* ---- 12. Detaljer som gör att helheten känns genomarbetad ---- */
+  .avatar { background-image: linear-gradient(150deg, color-mix(in srgb, var(--accent) 80%, #FFF), var(--accent)); }
+  .avatar.has-logo { background-image: none; }
+  .status-chip, .priority-chip, .delta-chip {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 12%, transparent);
+  }
+  .empty-state-icon { box-shadow: 0 0 0 8px color-mix(in srgb, var(--bg-soft) 55%, transparent); }
+  .mail-hero, .time-hero, .plan-hero {
+    background-image:
+      radial-gradient(120% 130% at 0% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 62%),
+      linear-gradient(135deg, var(--accent-soft), var(--surface));
+  }
+  .table-head, .invoice-head { border-bottom-color: var(--border-strong); }
+  .card-head h2 { display: inline-flex; align-items: center; gap: 9px; }
+  .chat-launcher { box-shadow: var(--shadow-lg), 0 12px 28px -10px var(--glow); }
+  .modal-overlay { backdrop-filter: blur(6px); }
+
+  /* ---- 13. "Viktigast idag": sidans handlingszon ----
+     Rangsiffran gör listan till en färdig plan i stället för tre likvärdiga val
+     — mindre att väga mellan, snabbare att komma igång. Det lodräta strecket
+     skiljer prioritet från innehåll utan att lägga till en ram. */
+  .todo-card {
+    border-color: var(--accent-soft-strong);
+    background-image: radial-gradient(120% 130% at 0% 0%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 58%);
+  }
+  .todo-row { gap: 14px; }
+  .todo-rank {
+    align-self: stretch; flex-shrink: 0; display: flex; align-items: center;
+    padding-right: 14px; border-right: 1px solid var(--hairline);
+    font-family: ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+    font-weight: 800; font-size: 13px; color: var(--ink-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .todo-row:first-child .todo-rank { color: var(--accent-strong); }
+  .todo-row .todo-icon { transition: transform .25s var(--ease-spring); }
+  .todo-row:hover .todo-icon { transform: scale(1.06) rotate(-2deg); }
+  @media (max-width: 640px) {
+    .todo-rank { align-self: center; border-right: none; padding-right: 0; }
+  }
+
+  /* ---- 14. Dagens uppdrag: psykologin i framstegsmätaren ----
+     Två saker gör mest skillnad för att man ska orka bli klar:
+     1) "X kvar" bredvid procenten — antal kvar motiverar mer än andel gjord
+        när man närmar sig mål (mållutningseffekten).
+     2) En rad som krediterar det Kanslio redan gjort i natt, så att dagen
+        aldrig börjar på noll utan på "nästan klart — godkänn bara". */
+  .progress-score { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .progress-remaining {
+    font-size: 12px; font-weight: 700; color: var(--ink-muted);
+    white-space: nowrap; font-variant-numeric: tabular-nums;
+  }
+  .progress-remaining.close { color: var(--accent-strong); }
+  .progress-nudge {
+    display: none; align-items: center; gap: 9px; margin-top: 14px;
+    padding: 11px 14px; border-radius: var(--r-md);
+    background: var(--bg-soft); border: 1px solid var(--hairline);
+    font-size: 13px; color: var(--ink-secondary); line-height: 1.45;
+  }
+  .progress-nudge.show { display: flex; }
+  .progress-nudge b { color: var(--ink); font-weight: 700; }
+  .progress-nudge svg { flex-shrink: 0; color: var(--accent-strong); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .progress-fill::after { animation: none; }
+    body { background-attachment: scroll; }
+  }
 </style>
 
 </head>
@@ -1459,14 +1785,36 @@
 
   <div class="main-col">
   <header class="topbar">
+    <div class="topbar-left">
+      <nav class="crumb" aria-label="Var du är">
+        <span class="crumb-root">Västerås SK</span>
+        <span class="crumb-sep" aria-hidden="true">/</span>
+        <span class="crumb-current" id="crumbCurrent">Översikt</span>
+      </nav>
+      <span class="live-pill" title="Kanslio bevakar mejl, fakturor och ärenden dygnet runt">
+        <span class="dot" aria-hidden="true"></span>Kanslio arbetar
+      </span>
+    </div>
     <div class="topbar-right">
       <label class="search">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input type="text" placeholder="Sök ärenden, klienter…" id="globalSearch" />
+        <input type="text" placeholder="Sök eller navigera…" id="globalSearch" readonly />
+        <kbd class="search-kbd">⌘K</kbd>
       </label>
-      <button class="icon-btn" aria-label="Aviseringar">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
-      </button>
+      <div class="profile-menu" id="notifMenu">
+        <button class="icon-btn profile-menu-trigger" id="notifTrigger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Öppna aviseringar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+          <span class="nav-badge notif-badge" id="notifBadge">0</span>
+        </button>
+        <div class="profile-menu-panel notif-panel" id="notifPanel" role="menu" aria-label="Aviseringar">
+          <div class="profile-menu-head">
+            <div class="name">Aviseringar</div>
+          </div>
+          <div id="notifList"></div>
+          <div class="profile-menu-divider"></div>
+          <button class="profile-menu-item" type="button" role="menuitem" data-goto="oversikt">Visa all aktivitet</button>
+        </div>
+      </div>
       <div class="profile-menu" id="profileMenu">
         <button class="avatar club-logo-slot profile-menu-trigger" id="topbarAvatar" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Öppna profilmeny">ES</button>
         <div class="profile-menu-panel" id="profileMenuPanel" role="menu" aria-label="Profilmeny">
@@ -1523,9 +1871,16 @@
         </div>
       </div>
 
-      <div class="card card-pad reveal">
+      <div class="section-rule reveal">
+        <span class="section-rule-label">Att göra nu</span>
+        <span class="section-rule-line"></span>
+        <span class="section-rule-meta">Kanslio har förberett allt åt dig</span>
+      </div>
+
+      <div class="card card-pad todo-card reveal">
         <div class="card-head"><h2>Viktigast idag</h2></div>
         <div class="todo-row">
+          <span class="todo-rank" aria-hidden="true">1</span>
           <div class="todo-icon todo-icon-blue">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 7l9 6 9-6"/></svg>
           </div>
@@ -1536,6 +1891,7 @@
           <button class="btn-primary" data-goto="mejl">Granska</button>
         </div>
         <div class="todo-row">
+          <span class="todo-rank" aria-hidden="true">2</span>
           <div class="todo-icon todo-icon-green">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6"/></svg>
           </div>
@@ -1546,6 +1902,7 @@
           <button class="btn-primary" data-goto="fakturor">Granska</button>
         </div>
         <div class="todo-row">
+          <span class="todo-rank" aria-hidden="true">3</span>
           <div class="todo-icon todo-icon-amber">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
           </div>
@@ -1563,7 +1920,10 @@
             <h2>Dagens uppdrag</h2>
             <div class="progress-sub" id="progressSub">1 av 10 uppdrag klara idag</div>
           </div>
-          <div class="progress-percent-value tabular" data-format="int">0<span class="unit">%</span></div>
+          <div class="progress-score">
+            <div class="progress-percent-value tabular" data-format="int">0<span class="unit">%</span></div>
+            <div class="progress-remaining" id="progressRemaining"></div>
+          </div>
         </div>
         <div class="progress-track">
           <span class="progress-goal" aria-hidden="true">
@@ -1589,6 +1949,7 @@
           <span>Start</span>
           <span>Mål &#8226; 100%</span>
         </div>
+        <div class="progress-nudge" id="progressNudge"></div>
         <div class="mission-celebrate" id="missionCelebrate">
           <span class="mission-celebrate-icon">🎉</span>
           <div>
@@ -1603,8 +1964,19 @@
         <div class="mission-list" id="missionList"></div>
       </div>
 
+      <div class="section-rule reveal">
+        <span class="section-rule-label">Läget i kansliet</span>
+        <span class="section-rule-line"></span>
+        <span class="section-rule-meta">Jämfört med förra veckan</span>
+      </div>
+
       <div class="stat-grid" id="statGrid">
         <!-- stat cards injected by JS -->
+      </div>
+
+      <div class="section-rule reveal">
+        <span class="section-rule-label">Din tid &amp; din dag</span>
+        <span class="section-rule-line"></span>
       </div>
 
       <div class="content-grid">
@@ -1667,6 +2039,12 @@
         </span>
       </div>
 
+      <div class="section-rule reveal">
+        <span class="section-rule-label">Utkast att granska</span>
+        <span class="section-rule-line"></span>
+        <span class="section-rule-meta">Viktigast överst</span>
+      </div>
+
       <div class="card card-pad">
         <div id="mailList"></div>
       </div>
@@ -1699,7 +2077,18 @@
         </span>
       </div>
 
+      <div class="section-rule reveal">
+        <span class="section-rule-label">Läget i ekonomin</span>
+        <span class="section-rule-line"></span>
+      </div>
+
       <div class="stat-grid" id="invoiceStatGrid"></div>
+
+      <div class="section-rule reveal">
+        <span class="section-rule-label">Alla fakturor</span>
+        <span class="section-rule-line"></span>
+        <span class="section-rule-meta">Förfallodatum närmast först</span>
+      </div>
 
       <div class="card card-pad">
         <div class="table-wrap">
@@ -1725,6 +2114,12 @@
         </button>
       </div>
 
+      <div class="section-rule reveal">
+        <span class="section-rule-label">Alla ärenden</span>
+        <span class="section-rule-line"></span>
+        <span class="section-rule-meta">Filtrera på status</span>
+      </div>
+
       <div class="card card-pad">
         <div class="filter-row">
           <div class="pill-filters" id="statusFilters">
@@ -1746,7 +2141,13 @@
           </div>
           <div id="fullTable"></div>
         </div>
-        <div class="footnote" id="tableEmpty" style="display:none;">Inga ärenden matchar filtret.</div>
+        <div id="tableEmpty" style="display:none;">
+          <div class="empty-state">
+            <div class="empty-state-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg></div>
+            <div class="empty-state-title">Inga ärenden matchar filtret</div>
+            <div class="empty-state-sub">Prova en annan status eller sökterm.</div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -2488,6 +2889,18 @@
   </div>
 </div>
 
+<!-- Kommandopalett (Cmd/Ctrl+K) -->
+<div class="modal-overlay cmdk-overlay" id="cmdkOverlay">
+  <div class="cmdk-panel" role="dialog" aria-modal="true" aria-label="Snabbkommandon">
+    <div class="cmdk-input-row">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" id="cmdkInput" placeholder="Sök vy eller åtgärd…" autocomplete="off" />
+      <kbd class="cmdk-esc">Esc</kbd>
+    </div>
+    <div class="cmdk-list" id="cmdkList"></div>
+  </div>
+</div>
+
 <!-- Chat -->
 <button class="chat-launcher" id="chatLauncher" aria-label="Öppna assistent" aria-expanded="false">
   <span class="badge"></span>
@@ -2996,6 +3409,16 @@
     return `style="transition-delay:${Math.min(idx, 8) * 45}ms"`;
   }
 
+  function emptyStateHTML(iconSvg, title, sub) {
+    return `<div class="empty-state reveal">
+      <div class="empty-state-icon">${iconSvg}</div>
+      <div class="empty-state-title">${title}</div>
+      <div class="empty-state-sub">${sub}</div>
+    </div>`;
+  }
+  const EMPTY_ICON_MAIL = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 7l9 6 9-6"/></svg>';
+  const EMPTY_ICON_INVOICE = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6"/></svg>';
+
   function renderStatGroup(containerId, stats) {
     const grid = document.getElementById(containerId);
     grid.innerHTML = stats.map((s, idx) => {
@@ -3034,7 +3457,7 @@
   function renderMail() {
     saveStored('mail', MAIL);
     const prioLabel = { hog: 'Hög prioritet', medel: 'Medel prioritet', lag: 'Låg prioritet' };
-    document.getElementById('mailList').innerHTML = MAIL.map((m, i) => `
+    document.getElementById('mailList').innerHTML = MAIL.length === 0 ? emptyStateHTML(EMPTY_ICON_MAIL, 'Inga mejl just nu', 'Nya mejlutkast dyker upp här så snart Kanslio skrivit klart dem åt dig.') : MAIL.map((m, i) => `
       <div class="mail-row reveal" ${revealDelay(i)} data-idx="${i}">
         <div class="mail-row-top">
           <div>
@@ -3250,11 +3673,39 @@
     setTimeout(() => spawnFireworkBurst(layer, 10, 6, colors), 520);
   }
 
+  const NUDGE_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13H11l-1 9 8.5-11H12l1-9z"/></svg>';
+
+  // Texten under mätaren byter ton med läget: krediterar Kanslios nattjobb när
+  // inget är gjort, och räknar ner de sista stegen när målet är nära.
+  function missionNudgeHTML(total, done) {
+    const left = total - done;
+    if (total === 0) return '';
+    if (done === 0) {
+      return `${NUDGE_ICON}<span>Kanslio har redan skrivit och sorterat allt det här åt dig i natt — <b>${total} saker</b> väntar bara på ditt godkännande.</span>`;
+    }
+    if (left === 1) return `${NUDGE_ICON}<span><b>Ett enda uppdrag kvar</b> till målet.</span>`;
+    if (left <= 3) return `${NUDGE_ICON}<span>Bara <b>${left} kvar</b> — du är nästan i mål.</span>`;
+    return `${NUDGE_ICON}<span><b>${done} avklarade</b> hittills idag. ${left} kvar till målet.</span>`;
+  }
+
   let missionCelebrated = false;
   function renderProgress() {
     const { total, done, percent } = computeMissionProgress();
     const sub = document.getElementById('progressSub');
     if (sub) sub.textContent = `${done} av ${total} uppdrag klara idag`;
+
+    const left = Math.max(0, total - done);
+    const remaining = document.getElementById('progressRemaining');
+    if (remaining) {
+      remaining.textContent = left === 0 ? 'allt klart' : `${left} kvar`;
+      remaining.classList.toggle('close', left > 0 && left <= 3);
+    }
+    const nudge = document.getElementById('progressNudge');
+    if (nudge) {
+      const html = left === 0 ? '' : missionNudgeHTML(total, done);
+      nudge.innerHTML = html;
+      nudge.classList.toggle('show', !!html);
+    }
 
     const fill = document.querySelector('.progress-fill');
     const percentEl = document.querySelector('.progress-percent-value');
@@ -3311,7 +3762,7 @@
       return '<button class="btn-ghost" type="button">Visa kvitto</button>';
     };
 
-    document.getElementById('invoiceTable').innerHTML = INVOICES.map((inv, idx) => `
+    document.getElementById('invoiceTable').innerHTML = INVOICES.length === 0 ? emptyStateHTML(EMPTY_ICON_INVOICE, 'Inga fakturor än', 'Nya fakturautkast dyker upp här när Kanslio skapat dem åt kansliet.') : INVOICES.map((inv, idx) => `
       <div class="invoice-item reveal" ${revealDelay(idx)} data-idx="${idx}">
         <div class="invoice-row">
           <div>
@@ -5049,12 +5500,18 @@ ${sectionsHtml}
 
   // ---- Sidebar navigation ----
   function activate(view) {
+    let label = '';
     document.querySelectorAll('.nav-item[data-view]').forEach(b => {
       const isActive = b.dataset.view === view;
       b.classList.toggle('active', isActive);
       b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      if (isActive) label = b.querySelector('.nav-label')?.textContent || '';
     });
     document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
+
+    // Brödsmulan i topbaren ska alltid svara på "var är jag nu?"
+    const crumb = document.getElementById('crumbCurrent');
+    if (crumb && label) crumb.textContent = label;
   }
 
   // ---- Klubblogga: uppladdad bild sparas och visas i sidomenyn + Mitt Kanslio ----
@@ -5594,6 +6051,141 @@ ${sectionsHtml}
   }
 
   // ---- Profilmeny (topbar) ----
+  // ---- Kommandopalett (Cmd/Ctrl+K) ----
+  function initCommandPalette() {
+    const overlay = document.getElementById('cmdkOverlay');
+    const input = document.getElementById('cmdkInput');
+    const list = document.getElementById('cmdkList');
+    const searchBox = document.getElementById('globalSearch');
+    if (!overlay || !input || !list) return;
+
+    const navCommands = Array.from(document.querySelectorAll('#tabs .nav-item')).map(item => ({
+      label: 'Gå till ' + item.querySelector('.nav-label').textContent.trim(),
+      icon: item.querySelector('.nav-icon').innerHTML,
+      action: () => activate(item.dataset.view),
+    }));
+
+    const iconMail = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 7l9 6 9-6"/></svg>';
+    const iconInvoice = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6"/></svg>';
+    const iconChat = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>';
+    const iconTheme = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5z"/></svg>';
+
+    const actionCommands = [
+      { label: 'Nytt mejl', icon: iconMail, action: () => { activate('mejl'); document.getElementById('newMailBtn')?.click(); } },
+      { label: 'Ny faktura', icon: iconInvoice, action: () => { activate('fakturor'); document.getElementById('newInvoiceBtn')?.click(); } },
+      { label: 'Öppna Kanslio-assistenten', icon: iconChat, action: () => document.getElementById('chatLauncher')?.click() },
+      { label: 'Växla ljust/mörkt läge', icon: iconTheme, action: () => document.getElementById('themeToggle')?.click() },
+    ];
+
+    const allCommands = navCommands.concat(actionCommands);
+    let filtered = allCommands;
+    let activeIndex = 0;
+
+    function renderList() {
+      list.innerHTML = filtered.length ? filtered.map((c, i) => `
+        <button type="button" class="cmdk-item${i === activeIndex ? ' active' : ''}" data-idx="${i}">
+          <span class="nav-icon">${c.icon}</span><span>${c.label}</span>
+        </button>`).join('') : `<div class="cmdk-empty">Inga träffar</div>`;
+      list.querySelectorAll('.cmdk-item').forEach(btn => {
+        btn.addEventListener('click', () => runCommand(parseInt(btn.dataset.idx, 10)));
+        btn.addEventListener('mouseenter', () => {
+          activeIndex = parseInt(btn.dataset.idx, 10);
+          list.querySelectorAll('.cmdk-item').forEach(b => b.classList.toggle('active', b === btn));
+        });
+      });
+    }
+
+    function runCommand(idx) {
+      const cmd = filtered[idx];
+      if (!cmd) return;
+      close();
+      cmd.action();
+    }
+
+    function open() {
+      overlay.classList.add('open');
+      input.value = '';
+      filtered = allCommands;
+      activeIndex = 0;
+      renderList();
+      setTimeout(() => input.focus(), 30);
+    }
+    function close() { overlay.classList.remove('open'); }
+
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      filtered = q ? allCommands.filter(c => c.label.toLowerCase().includes(q)) : allCommands;
+      activeIndex = 0;
+      renderList();
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); activeIndex = Math.min(activeIndex + 1, filtered.length - 1); renderList(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIndex = Math.max(activeIndex - 1, 0); renderList(); }
+      else if (e.key === 'Enter') { e.preventDefault(); runCommand(activeIndex); }
+      else if (e.key === 'Escape') { close(); }
+    });
+
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        overlay.classList.contains('open') ? close() : open();
+      }
+    });
+
+    if (searchBox) searchBox.addEventListener('focus', (e) => { e.target.blur(); open(); });
+  }
+
+  function renderNotifications() {
+    const list = document.getElementById('notifList');
+    const badge = document.getElementById('notifBadge');
+    if (!list || !badge) return;
+    const items = ACTIVITY.slice(0, 5);
+    list.innerHTML = items.length ? items.map(a => `
+      <div class="activity-item">
+        <div class="activity-avatar">${a.initials}</div>
+        <div>
+          <div class="activity-text"><b>${a.who}</b> ${a.text}</div>
+          <div class="activity-time">${a.time}</div>
+        </div>
+      </div>`).join('') : emptyStateHTML(EMPTY_ICON_MAIL, 'Inget nytt just nu', 'Ni är helt uppdaterade.');
+    badge.textContent = items.length;
+    badge.classList.toggle('zero', items.length === 0);
+  }
+
+  // Generic open/close toggle for a topbar dropdown menu (profile, notifications, ...)
+  function initTopbarMenu(wrapId, triggerId, panelId, onOpen) {
+    const wrap = document.getElementById(wrapId);
+    const trigger = document.getElementById(triggerId);
+    const panel = document.getElementById(panelId);
+    if (!wrap || !trigger || !panel) return null;
+
+    function close() {
+      panel.classList.remove('open');
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+    function open() {
+      panel.classList.add('open');
+      trigger.setAttribute('aria-expanded', 'true');
+      if (onOpen) onOpen();
+    }
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      panel.classList.contains('open') ? close() : open();
+    });
+    document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) close(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    panel.querySelectorAll('[data-goto]').forEach(el => el.addEventListener('click', close));
+    return { open, close };
+  }
+
+  function initNotifMenu() {
+    renderNotifications();
+    initTopbarMenu('notifMenu', 'notifTrigger', 'notifPanel');
+  }
+
   function initProfileMenu() {
     const wrap = document.getElementById('profileMenu');
     const trigger = document.getElementById('topbarAvatar');
@@ -5677,6 +6269,8 @@ ${sectionsHtml}
   safe(initTheme);
   safe(initSidebarCollapse);
   safe(initProfileMenu);
+  safe(initNotifMenu);
+  safe(initCommandPalette);
   safe(initScrollChrome);
   safe(observeReveals);
 })();
