@@ -329,19 +329,29 @@
     .pricing-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.25rem; max-width: 680px; margin: 0 auto;
+      gap: 1.5rem; max-width: 980px; margin: 0 auto;
+      align-items: start;
     }
     .plan {
+      position: relative;
       background: var(--white); border: 1px solid var(--border);
       border-radius: 12px; padding: 2rem; text-align: left;
+      transition: transform 0.3s cubic-bezier(.2,.8,.2,1), box-shadow 0.3s;
     }
-    .plan.featured { border-color: var(--navy); border-width: 2px; }
+    .plan.featured {
+      border-color: var(--navy); border-width: 2px;
+      box-shadow: 0 24px 60px rgba(27,42,74,0.16);
+    }
+    @media (min-width: 860px) {
+      .plan.featured { transform: translateY(-14px); }
+    }
     .plan-tag {
-      display: inline-block;
-      background: rgba(60,120,216,0.10); color: var(--blue);
+      position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+      display: inline-block; white-space: nowrap;
+      background: var(--navy); color: var(--cream);
       font-size: 0.68rem; font-weight: 700; letter-spacing: 1px;
-      padding: 0.2rem 0.65rem; border-radius: 4px;
-      margin-bottom: 1rem;
+      padding: 0.3rem 0.85rem; border-radius: 100px;
+      box-shadow: 0 4px 14px rgba(27,42,74,0.25);
     }
     .plan-name { font-size: 0.9rem; font-weight: 700; color: var(--navy); margin-bottom: 0.3rem; }
     .plan-price {
@@ -644,17 +654,31 @@
   <p class="sub">Under beta är det gratis. Efteråt väljer ni rätt plan — inga dolda avgifter.</p>
 
   <div class="pricing-grid">
-    <div class="plan featured">
-      <div class="plan-tag">POPULÄRAST</div>
-      <div class="plan-name">Klubb</div>
+    <div class="plan">
+      <div class="plan-name">Basic</div>
       <div class="plan-price">695 <span>kr/mån</span></div>
-      <div class="plan-desc">För den aktiva medelstora klubben som vill spara tid från dag ett.</div>
+      <div class="plan-desc">För klubben som vill komma igång och spara tid på det administrativa.</div>
       <hr>
       <ul>
         <li>Kommunikation & påminnelser</li>
         <li>Scheman & närvaro</li>
         <li>Rapport till styrelse</li>
         <li>E-postsupport</li>
+      </ul>
+      <a href="#kontakt" class="plan-btn outline">Ansök till beta</a>
+    </div>
+    <div class="plan featured">
+      <div class="plan-tag">POPULÄRAST</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">1295 <span>kr/mån</span></div>
+      <div class="plan-desc">För den aktiva klubben som vill maxa tidsvinsten och få mer stöd.</div>
+      <hr>
+      <ul>
+        <li>Allt i Basic</li>
+        <li>Obegränsad AI-kommunikation</li>
+        <li>Prioriterad support</li>
+        <li>Anpassade insikter & rapporter</li>
+        <li>Fler integrationer</li>
       </ul>
       <a href="#kontakt" class="plan-btn primary">Ansök till beta</a>
     </div>
@@ -664,7 +688,7 @@
       <div class="plan-desc">För större föreningar, förbund och klubbar med egna behov.</div>
       <hr>
       <ul>
-        <li>Allt i Klubb</li>
+        <li>Allt i Pro</li>
         <li>Anpassade integrationer</li>
         <li>Egen kontaktperson</li>
         <li>SLA & support</li>
